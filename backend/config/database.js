@@ -10,7 +10,7 @@ const connectDB = async () => {
       family: 4
     };
 
-    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/grindup', options);
+    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://skilledengineer71:grindup@grindup.onp2z1p.mongodb.net/?appName=Grindup', options);
 
     console.log(`MongoDB Connected: ${conn.connection.host} (${process.env.NODE_ENV} mode)`);
     
