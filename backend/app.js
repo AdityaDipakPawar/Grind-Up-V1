@@ -16,7 +16,7 @@ app.use(helmet());
 // Compress responses
 app.use(compression());
 
-// Middleware
+
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:5173',
