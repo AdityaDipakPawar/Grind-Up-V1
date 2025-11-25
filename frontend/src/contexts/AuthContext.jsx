@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
             setUser(userData.user);
             setIsAuthenticated(true);
           } catch (apiError) {
-            console.warn('Backend not available, using cached user data');
+            console.warn('Backend API Error : ', apiError);
             const cachedUser = localStorage.getItem('user');
             if (cachedUser) {
               setUser(JSON.parse(cachedUser));

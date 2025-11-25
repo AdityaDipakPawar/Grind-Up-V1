@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts';
 import { validateCompanySignupForm } from './utils';
-import './signup.css';
+import './styles/index.css';
 
 
 const CompanySignup = () => {

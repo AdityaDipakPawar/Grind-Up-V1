@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './contexts';
-import { validateCollegeSignupForm } from './utils';
-import './signup.css';
+import { useAuth } from '../contexts';
+import { validateCollegeSignupForm } from '../utils';
+import '../styles/index.css';
 
-const Signup = () => {
+const RegisterPage = () => {
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: '',
@@ -22,7 +22,7 @@ const Signup = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/home');
+      navigate('/');
     }
   }, [isAuthenticated, navigate]);
 
@@ -61,12 +61,12 @@ const Signup = () => {
       const result = await registerCollege(formData);
       if (result.success) {
         setMessage(result.message);
-        navigate('/home');
+        navigate('/');
       } else {
         setMessage(result.message);
       }
     } catch (error) {
-      setMessage('An unexpected error occurred. Please try again.');
+      setMessage('Error : ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -195,4 +195,4 @@ const Signup = () => {
   );
 };
 
-export default Signup; 
+export default RegisterPage; 

@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './contexts';
-import { validateLoginForm } from './utils';
-import './login.css';
+import { useAuth } from '../contexts';
+import { validateLoginForm } from '../utils';
+import '../styles/index.css';
 
-const Login = () => {
+const LoginPage = () => {
   const [showRegisterDropdown, setShowRegisterDropdown] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -30,7 +30,7 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/home');
+      navigate('/');
     }
   }, [isAuthenticated, navigate]);
 
@@ -83,12 +83,12 @@ const Login = () => {
       const result = await login(formData);
       if (result.success) {
         setMessage(result.message);
-        navigate('/home');
+        navigate('/');
       } else {
         setMessage(result.message);
       }
     } catch (error) {
-      setMessage('An unexpected error occurred. Please try again.');
+      setMessage('Error : ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -201,4 +201,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default LoginPage; 
