@@ -58,6 +58,7 @@ const Navbar = () => {
         {isAuthenticated ? (
           <div className="authenticated-user">
             <span className="welcome-text">Welcome, {user?.username || user?.collegeName || user?.companyName}</span>
+            <NavLink to="/profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Profile</NavLink>
             <button className="logout-btn" onClick={handleLogout}>
               Logout
             </button>

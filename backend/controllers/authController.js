@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const College = require('../models/College');
+const Company = require('../models/Company');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -29,6 +31,12 @@ exports.registerCollege = async (req, res) => {
     });
     
     await user.save();
+    await new College({
+      user: user._id,
+      collegeName,
+      email,
+      contactNo
+    }).save();
     
     // Generate JWT token
     const token = jwt.sign(
@@ -89,6 +97,15 @@ exports.registerCompany = async (req, res) => {
     });
     
     await user.save();
+    await new Company({
+      user: user._id,
+      companyName,
+      email,
+      contactNo,
+      industry,
+      companySize,
+      location
+    }).save();
     
     // Generate JWT token
     const token = jwt.sign(

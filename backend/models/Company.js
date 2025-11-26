@@ -15,9 +15,13 @@ const companySchema = new mongoose.Schema({
     lowercase: true,
     trim: true 
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    unique: true
+  },
   password: { 
-    type: String, 
-    required: true 
+    type: String 
   },
   
   // Contact Information
@@ -25,10 +29,6 @@ const companySchema = new mongoose.Schema({
     type: String, 
     required: true,
     trim: true 
-  },
-  location: { 
-    type: String, 
-    required: true 
   },
   // alternateContactNo: { 
   //   type: String,

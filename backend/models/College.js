@@ -15,9 +15,13 @@ const collegeSchema = new mongoose.Schema({
     lowercase: true,
     trim: true 
   },
+  user: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    unique: true 
+  },
   password: { 
-    type: String, 
-    required: true 
+    type: String 
   },
   
   // Contact Information
@@ -26,6 +30,17 @@ const collegeSchema = new mongoose.Schema({
     required: true,
     trim: true 
   },
+  collegeCity: { type: String },
+  grade: { type: String },
+  tpoName: { type: String },
+  tpoContactNo: { type: String },
+  universityAffiliation: { type: String },
+  courses: { type: String },
+  numStudents: { type: Number },
+  highestCGPA: { type: String },
+  avgCTC: { type: String },
+  avgPlaced: { type: Number },
+  placementPercent: { type: String },
   
   
   

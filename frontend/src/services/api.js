@@ -124,7 +124,7 @@ export const invitesAPI = {
 export const profileAPI = {
   // Get profile
   getProfile: async () => {
-    const response = await api.get('/profile');
+    const response = await api.get('/profile/me');
     return response.data;
   },
 
@@ -148,4 +148,3 @@ export const profileAPI = {
 };
 
 export default api;
-

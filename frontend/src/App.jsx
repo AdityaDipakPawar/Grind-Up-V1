@@ -14,6 +14,7 @@ import CompanySignup from './CompanySignup';
 import Footer from './Footer';
 import JobApplications from './pages/JobApplications';
 import ApplicationDetails from './pages/ApplicationDetails';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
           <Route path="/company-signup" element={<CompanySignup />} />
           <Route path="/job-applications/:jobId" element={<JobApplications />} />
           <Route path="/job-applications/view/:applicationId" element={<ApplicationDetails />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
         <Footer />
       </Router>
