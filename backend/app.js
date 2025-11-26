@@ -20,6 +20,7 @@ app.use(compression());
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:5173',
+    'https://grind-up-v1.vercel.app',
     'https://grind-up-v1-u32k.vercel.app',
     'https://www.grindup.co',
     'https://grindup.co',
@@ -84,3 +85,4 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 module.exports = app;
+app.set('trust proxy', 1);
