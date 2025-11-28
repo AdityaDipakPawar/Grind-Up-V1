@@ -39,6 +39,8 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    // Log error for debugging
+    console.error('API Error:', error.response?.data || error.message);
     return Promise.reject(error);
   }
 );
@@ -149,6 +151,25 @@ export const profileAPI = {
     });
     return response.data;
   },
+
+  // Upload placement records (Excel file)
+  uploadPlacementRecords: async (file) => {
+    const formData = new FormData();
+    formData.append('placementRecords', file);
+    const response = await api.post('/profile/placement-records/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Delete placement records
+  deletePlacementRecords: async () => {
+    const response = await api.delete('/profile/placement-records');
+    return response.data;
+  },
 };
 
 export default api;
+

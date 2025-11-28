@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts';
 import { profileAPI } from '../services/api.js';
+import Footer from '../Footer';
+import '../styles/Profile.css';
 
 const Profile = () => {
   const { isAuthenticated, user } = useAuth();
@@ -9,6 +11,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [formData, setFormData] = useState({});
+  const [placementFile, setPlacementFile] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -18,11 +22,15 @@ const Profile = () => {
     const loadProfile = async () => {
       try {
         const res = await profileAPI.getProfile();
+        // console.log('Profile API response:', res);
         if (res.success) {
           setFormData(res.data || {});
+        } else {
+          setMessage(res.message || 'Failed to load profile');
         }
-      } catch {
-        setMessage('Failed to load profile');
+      } catch (error) {
+        console.error('Profile load error:', error);
+        setMessage('Failed to load profile: ' + (error.response?.data?.message || error.message));
       } finally {
         setLoading(false);
       }
@@ -33,6 +41,88 @@ const Profile = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePlacementFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file type
+      const allowedTypes = [
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/x-xlsx',
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        setMessage('Please select a valid Excel file (.xls, .xlsx)');
+        return;
+      }
+
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage('File size must not exceed 5MB');
+        return;
+      }
+
+      setPlacementFile(file);
+      setMessage('');
+    }
+  };
+
+  const handleUploadPlacementRecords = async () => {
+    if (!placementFile) {
+      setMessage('Please select a file first');
+      return;
+    }
+
+    setUploadingFile(true);
+    setMessage('');
+    try {
+      const res = await profileAPI.uploadPlacementRecords(placementFile);
+      if (res.success) {
+        setMessage('Placement records uploaded successfully');
+        setPlacementFile(null);
+        setFormData((prev) => ({
+          ...prev,
+          placementRecordUrl: res.data.placementRecordUrl,
+          placementRecordUploadedAt: res.data.placementRecordUploadedAt,
+        }));
+        // Reset file input
+        const fileInput = document.getElementById('placementRecordInput');
+        if (fileInput) fileInput.value = '';
+      } else {
+        setMessage(res.message || 'Failed to upload placement records');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setMessage('Failed to upload: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleDeletePlacementRecords = async () => {
+    if (!window.confirm('Are you sure you want to delete the placement records?')) {
+      return;
+    }
+
+    setMessage('');
+    try {
+      const res = await profileAPI.deletePlacementRecords();
+      if (res.success) {
+        setMessage('Placement records deleted successfully');
+        setFormData((prev) => ({
+          ...prev,
+          placementRecordUrl: null,
+          placementRecordUploadedAt: null,
+        }));
+      } else {
+        setMessage(res.message || 'Failed to delete placement records');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      setMessage('Failed to delete: ' + (error.response?.data?.message || error.message));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -58,11 +148,13 @@ const Profile = () => {
   const isCollege = (user?.type === 'college');
 
   return (
-    <div className="container" style={{ padding: 20 }}>
-      <h2>Profile</h2>
-      {message && (
-        <div className={`message ${message.includes('successfully') ? 'success' : 'error'}`}>{message}</div>
-      )}
+    <div className="container">
+      <div style={{ padding: 20, paddingBottom: 0 }}>
+        <h2>Profile</h2>
+        {message && (
+          <div className={`message ${message.includes('successfully') ? 'success' : 'error'}`}>{message}</div>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit} className="application-form">
         {isCollege ? (
@@ -133,6 +225,89 @@ const Profile = () => {
                 <input name="placementPercent" value={formData.placementPercent || ''} onChange={handleChange} />
               </div>
             </div>
+
+            {/* Placement Records Section */}
+            <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '2px solid #eee' }}>
+              <h3 style={{ marginBottom: '15px' }}>Last 3 Years Placement Records</h3>
+              <div className="form-group">
+                <label>Upload Excel Sheet (.xls, .xlsx) - Max 5MB</label>
+                <input
+                  id="placementRecordInput"
+                  type="file"
+                  accept=".xls,.xlsx,.csv"
+                  onChange={handlePlacementFileChange}
+                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', width: '100%' }}
+                />
+              </div>
+              
+              {placementFile && (
+                <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#f0f0f0', borderRadius: '4px' }}>
+                  <p><strong>Selected file:</strong> {placementFile.name}</p>
+                  <button
+                    type="button"
+                    onClick={handleUploadPlacementRecords}
+                    disabled={uploadingFile}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#4CAF50',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: uploadingFile ? 'not-allowed' : 'pointer',
+                      opacity: uploadingFile ? 0.7 : 1,
+                    }}
+                  >
+                    {uploadingFile ? 'Uploading...' : 'Upload File'}
+                  </button>
+                </div>
+              )}
+
+              {formData.placementRecordUrl && (
+                <div style={{ marginTop: '15px', padding: '15px', backgroundColor: '#e8f5e9', borderRadius: '4px', border: '1px solid #4CAF50' }}>
+                  <p style={{ margin: '0 0 10px 0' }}>
+                    <strong>✓ Placement records uploaded</strong>
+                  </p>
+                  <p style={{ margin: '5px 0', fontSize: '0.9em', color: '#666' }}>
+                    Uploaded: {new Date(formData.placementRecordUploadedAt).toLocaleDateString()}
+                  </p>
+                  <a
+                    href={formData.placementRecordUrl}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-block',
+                      marginTop: '8px',
+                      padding: '6px 12px',
+                      backgroundColor: '#2196F3',
+                      color: 'white',
+                      textDecoration: 'none',
+                      borderRadius: '4px',
+                      fontSize: '0.9em',
+                      marginRight: '10px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Download File
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleDeletePlacementRecords}
+                    style={{
+                      padding: '6px 12px',
+                      backgroundColor: '#f44336',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.9em',
+                    }}
+                  >
+                    Delete File
+                  </button>
+                </div>
+              )}
+            </div>
           </>
         ) : (
           <>
@@ -166,6 +341,7 @@ const Profile = () => {
         )}
         <button type="submit" className="submit-btn">Save</button>
       </form>
+      <Footer />
     </div>
   );
 };

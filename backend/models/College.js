@@ -42,8 +42,14 @@ const collegeSchema = new mongoose.Schema({
   avgPlaced: { type: Number },
   placementPercent: { type: String },
   
-  
-  
+  // Placement Records
+  placementRecordUrl: { 
+    type: String,
+    description: 'Cloudinary URL for 3-year placement records Excel file'
+  },
+  placementRecordUploadedAt: { 
+    type: Date 
+  },
   
   // // Address Information
   // address: {

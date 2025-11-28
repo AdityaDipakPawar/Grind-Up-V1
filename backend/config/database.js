@@ -1,20 +1,34 @@
 const mongoose = require('mongoose');
 
 // Database configuration
+let isConnecting = false;
 const connectDB = async () => {
   try {
-    // Production-ready MongoDB connection options
+    if (mongoose.connection.readyState === 1) {
+      return;
+    }
+    if (isConnecting) {
+      return;
+    }
+    isConnecting = true;
+
+    const uri = process.env.MONGO_URI;
+    if (!uri) {
+      console.warn('MONGO_URI is not set. Skipping DB connection.');
+      isConnecting = false;
+      return;
+    }
+
     const options = {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       family: 4
     };
 
-    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://skilledengineer71:grindup@grindup.onp2z1p.mongodb.net/?appName=Grindup', options);
+    const conn = await mongoose.connect(uri, options);
 
     console.log(`MongoDB Connected: ${conn.connection.host} (${process.env.NODE_ENV} mode)`);
     
-    // Handle connection events
     mongoose.connection.on('error', (err) => {
       console.error('MongoDB connection error:', err);
     });
@@ -27,16 +41,15 @@ const connectDB = async () => {
       console.log('MongoDB reconnected');
     });
 
-    // Graceful shutdown
     process.on('SIGINT', async () => {
       await mongoose.connection.close();
       console.log('MongoDB connection closed through app termination');
       process.exit(0);
     });
-
   } catch (error) {
     console.error('Error connecting to MongoDB:', error.message);
-    process.exit(1);
+  } finally {
+    isConnecting = false;
   }
 };
 

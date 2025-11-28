@@ -9,6 +9,7 @@ const compression = require('compression');
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
@@ -17,16 +18,22 @@ app.use(helmet());
 app.use(compression());
 
 
-app.use(cors({
+// Normalize frontend origin (strip trailing slash) so origin matching works
+const FRONTEND_ORIGIN = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+const corsOptions = {
   origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
+    FRONTEND_ORIGIN,
     'https://grind-up-v1.vercel.app',
     'https://grind-up-v1-u32k.vercel.app',
     'https://www.grindup.co',
     'https://grindup.co',
   ],
-  credentials: true
-}));
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+// Use a RegExp to match all routes for OPTIONS to avoid path-to-regexp '*' parsing issue
+app.options(/.*/, cors(corsOptions));
 app.use(express.json());
 
 // Connect to MongoDB
@@ -65,7 +72,11 @@ app.use('/api/job-applications', jobApplicationRoutes);
 const rateLimit = require('express-rate-limit');
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: false,
+  skip: (req) => req.method === 'OPTIONS'
 });
 app.use('/api/', limiter);
 
@@ -85,4 +96,3 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 module.exports = app;
-app.set('trust proxy', 1);

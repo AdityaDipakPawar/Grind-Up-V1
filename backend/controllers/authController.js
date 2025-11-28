@@ -141,68 +141,45 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    let token, responseUser;
-
+    // Find user
     const user = await User.findOne({ email });
-    if (user) {
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ success: false, message: 'Invalid credentials' });
-      }
-      token = jwt.sign(
-        { id: user._id, email: user.email, type: user.type },
-        process.env.JWT_SECRET,
-        { expiresIn: '1d' }
-      );
-      responseUser = {
-        id: user._id,
-        email: user.email,
-        type: user.type,
-        collegeName: user.collegeName,
-        companyName: user.companyName
-      };
-    } else {
-      const college = await College.findOne({ email });
-      if (college) {
-        const isMatch = await bcrypt.compare(password, college.password);
-        if (!isMatch) {
-          return res.status(400).json({ success: false, message: 'Invalid credentials' });
-        }
-        token = jwt.sign(
-          { id: college._id, email: college.email, type: 'college' },
-          process.env.JWT_SECRET,
-          { expiresIn: '1d' }
-        );
-        responseUser = {
-          id: college._id,
-          email: college.email,
-          type: 'college',
-          collegeName: college.collegeName
-        };
-      } else {
-        const company = await Company.findOne({ email });
-        if (!company) {
-          return res.status(400).json({ success: false, message: 'Invalid credentials' });
-        }
-        const isMatch = await bcrypt.compare(password, company.password);
-        if (!isMatch) {
-          return res.status(400).json({ success: false, message: 'Invalid credentials' });
-        }
-        token = jwt.sign(
-          { id: company._id, email: company.email, type: 'company' },
-          process.env.JWT_SECRET,
-          { expiresIn: '1d' }
-        );
-        responseUser = {
-          id: company._id,
-          email: company.email,
-          type: 'company',
-          companyName: company.companyName
-        };
-      }
+    if (!user) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid credentials' 
+      });
     }
-
-    res.json({ success: true, message: 'Login successful', data: { token, user: responseUser } });
+    
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid credentials' 
+      });
+    }
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email, type: user.type }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '1d' }
+    );
+    
+    res.json({
+      success: true,
+      message: 'Login successful',
+      data: {
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+          type: user.type,
+          collegeName: user.collegeName,
+          companyName: user.companyName
+        }
+      }
+    });
   } catch (err) {
     res.status(500).json({ 
       success: false, 
@@ -216,43 +193,16 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     const { id, type } = req.user;
-    let entity;
-    if (type === 'college') {
-      entity = await College.findById(id).select('-password');
-      if (!entity) {
-        return res.status(404).json({ success: false, message: 'User not found' });
-      }
-      return res.json({
-        success: true,
-        user: {
-          id: entity._id,
-          email: entity.email,
-          type: 'college',
-          collegeName: entity.collegeName
-        }
-      });
-    }
-    if (type === 'company') {
-      entity = await Company.findById(id).select('-password');
-      if (!entity) {
-        return res.status(404).json({ success: false, message: 'User not found' });
-      }
-      return res.json({
-        success: true,
-        user: {
-          id: entity._id,
-          email: entity.email,
-          type: 'company',
-          companyName: entity.companyName
-        }
-      });
-    }
-
+    // console.log('getMe - Getting user with id:', id, 'type:', type);
+    
     const user = await User.findById(id).select('-password');
     if (!user) {
+      // console.log('getMe - User not found with id:', id);
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    return res.json({
+    
+    // console.log('getMe - Found user:', user);
+    res.json({
       success: true,
       user: {
         id: user._id,
@@ -263,6 +213,7 @@ exports.getMe = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error('getMe error:', err);
     res.status(500).json({ 
       success: false, 
       message: 'Server error', 
