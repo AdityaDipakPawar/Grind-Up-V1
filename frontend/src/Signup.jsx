@@ -61,7 +61,8 @@ const Signup = () => {
       const result = await registerCollege(formData);
       if (result.success) {
         setMessage(result.message);
-        navigate('/home');
+        // Redirect to profile page for completion
+        navigate('/profile', { state: { from: '/home', message: 'Please complete your profile to access full features' } });
       } else {
         setMessage(result.message);
       }

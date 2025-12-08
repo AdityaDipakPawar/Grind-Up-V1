@@ -15,6 +15,7 @@ import Footer from './Footer';
 import JobApplications from './pages/JobApplications';
 import ApplicationDetails from './pages/ApplicationDetails';
 import Profile from './pages/Profile';
+import Dashboard from './components/Dashboard';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/company-signup" element={<CompanySignup />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/job-applications/:jobId" element={<JobApplications />} />
           <Route path="/job-applications/view/:applicationId" element={<ApplicationDetails />} />
           <Route path="/profile" element={<Profile />} />

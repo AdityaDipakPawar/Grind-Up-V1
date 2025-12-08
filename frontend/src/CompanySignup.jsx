@@ -65,7 +65,8 @@ const CompanySignup = () => {
       const result = await registerCompany(formData);
       if (result.success) {
         setMessage(result.message);
-        navigate('/home');
+        // Redirect to profile page for completion
+        navigate('/profile', { state: { from: '/home', message: 'Please complete your profile to access full features' } });
       } else {
         setMessage(result.message);
       }
@@ -162,15 +163,23 @@ const CompanySignup = () => {
             />
             {errors.industry && <span className="error-text">{errors.industry}</span>}
             
-            <input 
-              type="text" 
+            <label htmlFor="companySize" style={{ display: 'block', marginTop: '8px' }}>Company Size</label>
+            <select
               name="companySize"
-              placeholder="Company Size" 
+              id="companySize"
               value={formData.companySize}
               onChange={handleInputChange}
               className={errors.companySize ? 'error' : ''}
-              required 
-            />
+              required
+              style={{ padding: '8px', width: '100%', marginBottom: '6px' }}
+            >
+              <option value="">Select company size</option>
+              <option value="1-50">1-50</option>
+              <option value="51-200">51-200</option>
+              <option value="201-500">201-500</option>
+              <option value="501-1000">501-1000</option>
+              <option value="1000+">1000+</option>
+            </select>
             {errors.companySize && <span className="error-text">{errors.companySize}</span>}
             
             <input 

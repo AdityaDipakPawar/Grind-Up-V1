@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./contexts";
+import ProfileCompletionWarning from "./components/ProfileCompletionWarning";
 import "./styles/home.css";
 
 const Home = () => {
@@ -184,6 +185,7 @@ const Home = () => {
     <div className="home-page">
       <main className="main-content">
         <div className="hero-section">
+          {isAuthenticated && <ProfileCompletionWarning />}
           {isAuthenticated && user?.type === "company" && (
             <div className="company-actions">
               <h2>Welcome, {user.companyName}</h2>

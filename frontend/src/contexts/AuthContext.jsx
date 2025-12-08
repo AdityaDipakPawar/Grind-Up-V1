@@ -115,7 +115,13 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: response.message };
       }
     } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed. Please try again.';
+      // If validation errors from express-validator exist, concatenate them
+      const apiData = error.response?.data;
+      if (apiData && Array.isArray(apiData.errors)) {
+        const msgs = apiData.errors.map(e => `${e.field}: ${e.message}`);
+        return { success: false, message: msgs.join(' | ') };
+      }
+      const message = apiData?.message || 'Registration failed. Please try again.';
       return { success: false, message };
     } finally {
       setLoading(false);
@@ -142,6 +148,22 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
+  // Check profile completion status
+  const checkProfileCompletion = async () => {
+    try {
+      const response = await authAPI.checkProfileCompletion();
+      if (response.success) {
+        return {
+          profileComplete: response.profileComplete,
+          missingFields: response.missingFields
+        };
+      }
+    } catch (error) {
+      console.error('Error checking profile completion:', error);
+    }
+    return { profileComplete: user?.profileComplete || false, missingFields: [] };
+  };
+
   const value = {
     user,
     loading,
@@ -151,6 +173,7 @@ export const AuthProvider = ({ children }) => {
     registerCompany,
     logout,
     updateUser,
+    checkProfileCompletion,
   };
 
   return (

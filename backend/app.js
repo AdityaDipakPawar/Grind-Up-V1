@@ -68,6 +68,9 @@ app.use('/api/job-posts', jobPostsRoutes);
 const jobApplicationRoutes = require('./routes/jobApplication');
 app.use('/api/job-applications', jobApplicationRoutes);
 
+const dashboardRoutes = require('./routes/dashboard');
+app.use('/api/dashboard', dashboardRoutes);
+
 // Rate limiting
 const rateLimit = require('express-rate-limit');
 const limiter = rateLimit({

@@ -77,6 +77,12 @@ export const authAPI = {
     return response.data;
   },
 
+  // Check profile completion status
+  checkProfileCompletion: async () => {
+    const response = await api.get('/auth/check-profile-completion');
+    return response.data;
+  },
+
   // Refresh token
   refreshToken: async () => {
     const response = await api.post('/auth/refresh');
@@ -144,11 +150,8 @@ export const profileAPI = {
   uploadProfilePicture: async (file) => {
     const formData = new FormData();
     formData.append('profilePicture', file);
-    const response = await api.post('/profile/picture', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // Let the browser set the Content-Type (with boundary) for multipart requests
+    const response = await api.post('/profile/picture', formData);
     return response.data;
   },
 
@@ -156,11 +159,8 @@ export const profileAPI = {
   uploadPlacementRecords: async (file) => {
     const formData = new FormData();
     formData.append('placementRecords', file);
-    const response = await api.post('/profile/placement-records/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // Let the browser set the Content-Type (with boundary) for multipart requests
+    const response = await api.post('/profile/placement-records/upload', formData);
     return response.data;
   },
 

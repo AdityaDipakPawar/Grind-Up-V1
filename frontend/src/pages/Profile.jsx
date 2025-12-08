@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts';
-import { profileAPI } from '../services/api.js';
+import { profileAPI, authAPI } from '../services/api.js';
 import Footer from '../Footer';
 import '../styles/Profile.css';
 
 const Profile = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, updateUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [formData, setFormData] = useState({});
+  const [originalData, setOriginalData] = useState({});
   const [placementFile, setPlacementFile] = useState(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -25,6 +27,7 @@ const Profile = () => {
         // console.log('Profile API response:', res);
         if (res.success) {
           setFormData(res.data || {});
+          setOriginalData(res.data || {});
         } else {
           setMessage(res.message || 'Failed to load profile');
         }
@@ -67,6 +70,61 @@ const Profile = () => {
       setPlacementFile(file);
       setMessage('');
     }
+  };
+
+  // Define required fields based on user type
+  const getMandatoryFields = () => {
+    if (user?.type === 'college') {
+      return ['collegeName', 'contactNo', 'collegeCity', 'grade', 'tpoName', 'tpoContactNo', 'universityAffiliation', 'courses', 'numStudents', 'highestCGPA', 'avgCTC', 'avgPlaced', 'placementPercent', 'placementRecordUrl'];
+    } else {
+      return ['companyName', 'contactNo', 'industry', 'companySize', 'location', 'recruiterName', 'recruiterEmail', 'companyBio', 'yearsOfExperience'];
+    }
+  };
+
+  // Validate form data
+  const validateForm = () => {
+    const errors = {};
+    const mandatoryFields = getMandatoryFields();
+
+    mandatoryFields.forEach((field) => {
+      const value = formData[field];
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        const fieldLabels = {
+          collegeName: 'College Name',
+          contactNo: 'Contact No',
+          collegeCity: 'City',
+          grade: 'Grade',
+          tpoName: 'TPO Name',
+          tpoContactNo: 'TPO Contact No',
+          universityAffiliation: 'University Affiliation',
+          courses: 'Courses',
+          numStudents: 'Number of Students',
+          highestCGPA: 'Highest CGPA',
+          avgCTC: 'Average CTC',
+          avgPlaced: 'Average Placed',
+          placementPercent: 'Placement Percent',
+          placementRecordUrl: 'Placement Records',
+          companyName: 'Company Name',
+          industry: 'Industry',
+          companySize: 'Company Size',
+          location: 'Location',
+          recruiterName: 'Recruiter Name',
+          recruiterEmail: 'Recruiter Email',
+          companyBio: 'Company Bio',
+          yearsOfExperience: 'Years of Experience',
+        };
+        errors[field] = `${fieldLabels[field] || field} is required`;
+      }
+    });
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Check if any mandatory field has changed
+  const hasNewData = () => {
+    const mandatoryFields = getMandatoryFields();
+    return mandatoryFields.some((field) => formData[field] !== originalData[field]);
   };
 
   const handleUploadPlacementRecords = async () => {
@@ -128,15 +186,38 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
+    setValidationErrors({});
+
+    // Check if any new data has been entered
+    if (!hasNewData()) {
+      setMessage('Please enter new data in at least one mandatory field to save');
+      return;
+    }
+
+    // Validate form
+    if (!validateForm()) {
+      setMessage('Please fill all mandatory fields');
+      return;
+    }
+
     try {
       const res = await profileAPI.updateProfile(formData);
       if (res.success) {
         setMessage('Profile updated successfully');
         setFormData(res.data);
+        setOriginalData(res.data);
+        
+        // Update user context with new profile completion status
+        // Fetch latest user data to get updated profileComplete flag
+        const currentUserData = await authAPI.getCurrentUser();
+        if (currentUserData && currentUserData.user) {
+          updateUser(currentUserData.user);
+        }
       } else {
         setMessage(res.message || 'Update failed');
       }
-    } catch {
+    } catch (error) {
+      console.error('Profile update error:', error);
       setMessage('Update failed');
     }
   };
@@ -161,76 +242,89 @@ const Profile = () => {
           <>
             <div className="form-row">
               <div className="form-group">
-                <label>College Name</label>
+                <label>College Name <span style={{ color: 'red' }}>*</span></label>
                 <input name="collegeName" value={formData.collegeName || ''} onChange={handleChange} />
+                {validationErrors.collegeName && <span className="error-text">{validationErrors.collegeName}</span>}
               </div>
               <div className="form-group">
-                <label>Contact No</label>
+                <label>Contact No <span style={{ color: 'red' }}>*</span></label>
                 <input name="contactNo" value={formData.contactNo || ''} onChange={handleChange} />
+                {validationErrors.contactNo && <span className="error-text">{validationErrors.contactNo}</span>}
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>City</label>
+                <label>City <span style={{ color: 'red' }}>*</span></label>
                 <input name="collegeCity" value={formData.collegeCity || ''} onChange={handleChange} />
+                {validationErrors.collegeCity && <span className="error-text">{validationErrors.collegeCity}</span>}
               </div>
               <div className="form-group">
-                <label>Grade</label>
+                <label>Grade <span style={{ color: 'red' }}>*</span></label>
                 <input name="grade" value={formData.grade || ''} onChange={handleChange} />
+                {validationErrors.grade && <span className="error-text">{validationErrors.grade}</span>}
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>TPO Name</label>
+                <label>TPO Name <span style={{ color: 'red' }}>*</span></label>
                 <input name="tpoName" value={formData.tpoName || ''} onChange={handleChange} />
+                {validationErrors.tpoName && <span className="error-text">{validationErrors.tpoName}</span>}
               </div>
               <div className="form-group">
-                <label>TPO Contact No</label>
+                <label>TPO Contact No <span style={{ color: 'red' }}>*</span></label>
                 <input name="tpoContactNo" value={formData.tpoContactNo || ''} onChange={handleChange} />
+                {validationErrors.tpoContactNo && <span className="error-text">{validationErrors.tpoContactNo}</span>}
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>University Affiliation</label>
+                <label>University Affiliation <span style={{ color: 'red' }}>*</span></label>
                 <input name="universityAffiliation" value={formData.universityAffiliation || ''} onChange={handleChange} />
+                {validationErrors.universityAffiliation && <span className="error-text">{validationErrors.universityAffiliation}</span>}
               </div>
               <div className="form-group">
-                <label>Courses</label>
+                <label>Courses <span style={{ color: 'red' }}>*</span></label>
                 <input name="courses" value={formData.courses || ''} onChange={handleChange} />
+                {validationErrors.courses && <span className="error-text">{validationErrors.courses}</span>}
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Number of Students</label>
+                <label>Number of Students <span style={{ color: 'red' }}>*</span></label>
                 <input name="numStudents" type="number" value={formData.numStudents || ''} onChange={handleChange} />
+                {validationErrors.numStudents && <span className="error-text">{validationErrors.numStudents}</span>}
               </div>
               <div className="form-group">
-                <label>Highest CGPA</label>
+                <label>Highest CGPA <span style={{ color: 'red' }}>*</span></label>
                 <input name="highestCGPA" value={formData.highestCGPA || ''} onChange={handleChange} />
+                {validationErrors.highestCGPA && <span className="error-text">{validationErrors.highestCGPA}</span>}
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Average CTC</label>
+                <label>Average CTC <span style={{ color: 'red' }}>*</span></label>
                 <input name="avgCTC" value={formData.avgCTC || ''} onChange={handleChange} />
+                {validationErrors.avgCTC && <span className="error-text">{validationErrors.avgCTC}</span>}
               </div>
               <div className="form-group">
-                <label>Average Placed</label>
+                <label>Average Placed <span style={{ color: 'red' }}>*</span></label>
                 <input name="avgPlaced" type="number" value={formData.avgPlaced || ''} onChange={handleChange} />
+                {validationErrors.avgPlaced && <span className="error-text">{validationErrors.avgPlaced}</span>}
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Placement Percent</label>
+                <label>Placement Percent <span style={{ color: 'red' }}>*</span></label>
                 <input name="placementPercent" value={formData.placementPercent || ''} onChange={handleChange} />
+                {validationErrors.placementPercent && <span className="error-text">{validationErrors.placementPercent}</span>}
               </div>
             </div>
 
             {/* Placement Records Section */}
             <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '2px solid #eee' }}>
-              <h3 style={{ marginBottom: '15px' }}>Last 3 Years Placement Records</h3>
+              <h3 style={{ marginBottom: '15px' }}>Last 3 Years Placement Records <span style={{ color: 'red' }}>*</span></h3>
               <div className="form-group">
-                <label>Upload Excel Sheet (.xls, .xlsx) - Max 5MB</label>
+                <label>Upload Excel Sheet (.xls, .xlsx) - Max 5MB <span style={{ color: 'red' }}>*</span></label>
                 <input
                   id="placementRecordInput"
                   type="file"
@@ -313,28 +407,59 @@ const Profile = () => {
           <>
             <div className="form-row">
               <div className="form-group">
-                <label>Company Name</label>
+                <label>Company Name <span style={{ color: 'red' }}>*</span></label>
                 <input name="companyName" value={formData.companyName || ''} onChange={handleChange} />
+                {validationErrors.companyName && <span className="error-text">{validationErrors.companyName}</span>}
               </div>
               <div className="form-group">
-                <label>Contact No</label>
+                <label>Contact No <span style={{ color: 'red' }}>*</span></label>
                 <input name="contactNo" value={formData.contactNo || ''} onChange={handleChange} />
+                {validationErrors.contactNo && <span className="error-text">{validationErrors.contactNo}</span>}
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Industry</label>
+                <label>Industry <span style={{ color: 'red' }}>*</span></label>
                 <input name="industry" value={formData.industry || ''} onChange={handleChange} />
+                {validationErrors.industry && <span className="error-text">{validationErrors.industry}</span>}
               </div>
               <div className="form-group">
-                <label>Company Size</label>
+                <label>Company Size <span style={{ color: 'red' }}>*</span></label>
                 <input name="companySize" value={formData.companySize || ''} onChange={handleChange} />
+                {validationErrors.companySize && <span className="error-text">{validationErrors.companySize}</span>}
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Location</label>
+                <label>Location <span style={{ color: 'red' }}>*</span></label>
                 <input name="location" value={formData.location || ''} onChange={handleChange} />
+                {validationErrors.location && <span className="error-text">{validationErrors.location}</span>}
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Recruiter Name <span style={{ color: 'red' }}>*</span></label>
+                <input name="recruiterName" value={formData.recruiterName || ''} onChange={handleChange} />
+                {validationErrors.recruiterName && <span className="error-text">{validationErrors.recruiterName}</span>}
+              </div>
+              <div className="form-group">
+                <label>Recruiter Email <span style={{ color: 'red' }}>*</span></label>
+                <input type="email" name="recruiterEmail" value={formData.recruiterEmail || ''} onChange={handleChange} />
+                {validationErrors.recruiterEmail && <span className="error-text">{validationErrors.recruiterEmail}</span>}
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Company Bio <span style={{ color: 'red' }}>*</span></label>
+                <textarea name="companyBio" value={formData.companyBio || ''} onChange={handleChange} rows="3" style={{ resize: 'vertical' }} />
+                {validationErrors.companyBio && <span className="error-text">{validationErrors.companyBio}</span>}
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Years of Experience <span style={{ color: 'red' }}>*</span></label>
+                <input type="number" name="yearsOfExperience" value={formData.yearsOfExperience || ''} onChange={handleChange} />
+                {validationErrors.yearsOfExperience && <span className="error-text">{validationErrors.yearsOfExperience}</span>}
               </div>
             </div>
           </>

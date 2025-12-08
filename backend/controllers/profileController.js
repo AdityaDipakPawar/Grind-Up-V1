@@ -3,6 +3,25 @@ const Company = require('../models/Company');
 const User = require('../models/User');
 const { uploadToCloudinary, deleteFromCloudinary, getDownloadUrl } = require('../utils/cloudinaryUpload');
 
+// Define mandatory fields for profile completion
+const MANDATORY_FIELDS = {
+  college: ['collegeName', 'contactNo', 'collegeCity', 'grade', 'tpoName', 'tpoContactNo', 'universityAffiliation', 'courses', 'numStudents', 'highestCGPA', 'avgCTC', 'avgPlaced', 'placementPercent', 'placementRecordUrl'],
+  company: ['companyName', 'contactNo', 'industry', 'companySize', 'location', 'recruiterName', 'recruiterEmail', 'companyBio', 'yearsOfExperience'],
+};
+
+// Validate mandatory fields
+const validateMandatoryFields = (data, userType) => {
+  const mandatoryFields = userType === 'college' ? MANDATORY_FIELDS.college : MANDATORY_FIELDS.company;
+  const missingFields = mandatoryFields.filter(field => !data[field] || data[field].toString().trim() === '');
+  return missingFields;
+};
+
+// Check if data has changed (at least one mandatory field is different)
+const hasDataChanged = (newData, oldData, userType) => {
+  const mandatoryFields = userType === 'college' ? MANDATORY_FIELDS.college : MANDATORY_FIELDS.company;
+  return mandatoryFields.some(field => newData[field] !== oldData[field]);
+};
+
 exports.createProfile = async (req, res) => {
   try {
     const model = req.user.type === 'college' ? College : Company;
@@ -80,6 +99,29 @@ exports.getMyProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const model = req.user.type === 'college' ? College : Company;
+    
+    // First, get the current profile to check for changes
+    const currentProfile = await model.findOne({ user: req.user.id });
+    const currentData = currentProfile ? currentProfile.toObject() : {};
+
+    // Check if any mandatory field has changed
+    if (!hasDataChanged(req.body, currentData, req.user.type)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please enter new data in at least one mandatory field to save' 
+      });
+    }
+
+    // Validate mandatory fields
+    const missingFields = validateMandatoryFields(req.body, req.user.type);
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: `Mandatory fields missing: ${missingFields.join(', ')}` 
+      });
+    }
+
+    // Update the profile
     const doc = await model.findOneAndUpdate(
       { user: req.user.id },
       req.body,

@@ -2,17 +2,22 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const auth = require('../middleware/auth');
+const { 
+  validateCollegeRegister, 
+  validateCompanyRegister, 
+  validateLogin 
+} = require('../middleware/validation');
 
-// Registration routes
-router.post('/register/college', authController.registerCollege);
-router.post('/register/company', authController.registerCompany);
+// Registration routes with validation
+router.post('/register/college', validateCollegeRegister, authController.registerCollege);
+router.post('/register/company', validateCompanyRegister, authController.registerCompany);
 
-// Authentication routes
-router.post('/login', authController.login);
+// Authentication routes with validation
+router.post('/login', validateLogin, authController.login);
 router.post('/logout', auth, authController.logout);
 
 // User info route
 router.get('/me', auth, authController.getMe);
+router.get('/check-profile-completion', auth, authController.checkProfileCompletion);
 
 module.exports = router;
-

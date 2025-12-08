@@ -9,6 +9,7 @@ const fileFilter = (req, file, cb) => {
     'application/vnd.ms-excel', // .xls
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
     'application/x-xlsx',
+    'text/csv', // allow CSV uploads as well
   ];
 
   if (allowedMimes.includes(file.mimetype)) {

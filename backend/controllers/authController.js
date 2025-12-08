@@ -54,7 +54,8 @@ exports.registerCollege = async (req, res) => {
           id: user._id,
           email: user.email,
           type: user.type,
-          collegeName: user.collegeName
+          collegeName: user.collegeName,
+          profileComplete: false
         }
       }
     });
@@ -123,7 +124,8 @@ exports.registerCompany = async (req, res) => {
           id: user._id,
           email: user.email,
           type: user.type,
-          companyName: user.companyName
+          companyName: user.companyName,
+          profileComplete: false
         }
       }
     });
@@ -166,6 +168,11 @@ exports.login = async (req, res) => {
       { expiresIn: '1d' }
     );
     
+    // Check profile completion for login
+    const ProfileModel = user.type === 'college' ? College : Company;
+    const profile = await ProfileModel.findOne({ user: user._id });
+    const profileComplete = isProfileComplete(profile, user.type);
+    
     res.json({
       success: true,
       message: 'Login successful',
@@ -176,7 +183,8 @@ exports.login = async (req, res) => {
           email: user.email,
           type: user.type,
           collegeName: user.collegeName,
-          companyName: user.companyName
+          companyName: user.companyName,
+          profileComplete
         }
       }
     });
@@ -187,6 +195,45 @@ exports.login = async (req, res) => {
       error: err.message 
     });
   }
+};
+
+// Helper function to check if profile is complete
+const isProfileComplete = (profile, userType) => {
+  if (!profile) return false;
+  
+  if (userType === 'college') {
+    // College profile is complete when ALL fields are filled
+    return !!(
+      profile.collegeName && 
+      profile.contactNo && 
+      profile.collegeCity && 
+      profile.grade && 
+      profile.tpoName && 
+      profile.tpoContactNo && 
+      profile.universityAffiliation && 
+      profile.courses && 
+      profile.numStudents && 
+      profile.highestCGPA && 
+      profile.avgCTC && 
+      profile.avgPlaced && 
+      profile.placementPercent && 
+      profile.placementRecordUrl
+    );
+  } else if (userType === 'company') {
+    // Company profile is complete when ALL fields are filled
+    return !!(
+      profile.companyName && 
+      profile.contactNo && 
+      profile.industry && 
+      profile.companySize && 
+      profile.location && 
+      profile.recruiterName && 
+      profile.recruiterEmail && 
+      profile.companyBio && 
+      profile.yearsOfExperience
+    );
+  }
+  return false;
 };
 
 // Get current user
@@ -201,6 +248,11 @@ exports.getMe = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
     
+    // Check profile completion
+    const ProfileModel = type === 'college' ? College : Company;
+    const profile = await ProfileModel.findOne({ user: id });
+    const profileComplete = isProfileComplete(profile, type);
+    
     // console.log('getMe - Found user:', user);
     res.json({
       success: true,
@@ -209,7 +261,8 @@ exports.getMe = async (req, res) => {
         email: user.email,
         type: user.type,
         collegeName: user.collegeName,
-        companyName: user.companyName
+        companyName: user.companyName,
+        profileComplete
       }
     });
   } catch (err) {
@@ -220,6 +273,50 @@ exports.getMe = async (req, res) => {
       error: err.message 
     });
   }
+};
+
+// Check profile completion status
+exports.checkProfileCompletion = async (req, res) => {
+  try {
+    const { id, type } = req.user;
+    
+    const ProfileModel = type === 'college' ? College : Company;
+    const profile = await ProfileModel.findOne({ user: id });
+    
+    const profileComplete = isProfileComplete(profile, type);
+    
+    res.json({
+      success: true,
+      profileComplete,
+      missingFields: getMissingFields(profile, type)
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error', 
+      error: err.message 
+    });
+  }
+};
+
+// Helper to get missing fields for profile completion
+const getMissingFields = (profile, userType) => {
+  const missing = [];
+  
+  if (userType === 'college') {
+    if (!profile?.tpoName) missing.push('TPO Name');
+    if (!profile?.collegeCity) missing.push('College City');
+    if (!profile?.avgCTC) missing.push('Average CTC');
+    if (!profile?.placementPercent) missing.push('Placement Percentage');
+    if (!profile?.placementRecordUrl) missing.push('Placement Record');
+  } else if (userType === 'company') {
+    if (!profile?.recruiterName) missing.push('Recruiter Name');
+    if (!profile?.recruiterEmail) missing.push('Recruiter Email');
+    if (!profile?.companyBio) missing.push('Company Bio');
+    if (!profile?.yearsOfExperience) missing.push('Years of Experience');
+  }
+  
+  return missing;
 };
 
 // Logout

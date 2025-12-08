@@ -34,7 +34,7 @@ body {
 
 /* Main content area */
 .main-content {
-  padding-top: 120px; /* Significant padding to push content below navbar */
+  padding-top: 200px; /* Extra padding to account for fixed warning banner + navbar */
   background-image: url('../assets/background.jpg');
   background-size: cover;
   background-position: center;

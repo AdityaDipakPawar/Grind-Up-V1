@@ -83,6 +83,7 @@ const Login = () => {
       const result = await login(formData);
       if (result.success) {
         setMessage(result.message);
+        // Redirect to profile page if profile is incomplete, otherwise to home
         navigate('/home');
       } else {
         setMessage(result.message);

@@ -101,6 +101,12 @@ export const validateCompanySignupForm = (formData) => {
     errors.companySize = 'Company size is required';
   }
 
+  // Ensure companySize matches backend allowed values
+  const allowedSizes = ['1-50', '51-200', '201-500', '501-1000', '1000+'];
+  if (formData.companySize && !allowedSizes.includes(formData.companySize)) {
+    errors.companySize = 'Company size must be one of: ' + allowedSizes.join(', ');
+  }
+
   if (!validateRequired(formData.location)) {
     errors.location = 'Location is required';
   }

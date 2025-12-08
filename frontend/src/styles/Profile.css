@@ -56,6 +56,27 @@
   box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
 }
 
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
+
+.error-text {
+  color: #d32f2f;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
 .submit-btn {
   padding: 12px 24px;
   background-color: #0066cc;
