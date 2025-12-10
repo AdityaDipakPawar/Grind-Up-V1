@@ -296,14 +296,14 @@ const Profile = () => {
               </div>
               <div className="form-group">
                 <label>Highest CGPA <span style={{ color: 'red' }}>*</span></label>
-                <input name="highestCGPA" value={formData.highestCGPA || ''} onChange={handleChange} />
+                <input name="highestCGPA" type='number' value={formData.highestCGPA || ''} onChange={handleChange} />
                 {validationErrors.highestCGPA && <span className="error-text">{validationErrors.highestCGPA}</span>}
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
                 <label>Average CTC <span style={{ color: 'red' }}>*</span></label>
-                <input name="avgCTC" value={formData.avgCTC || ''} onChange={handleChange} />
+                <input name="avgCTC" type='number' value={formData.avgCTC || ''} onChange={handleChange} />
                 {validationErrors.avgCTC && <span className="error-text">{validationErrors.avgCTC}</span>}
               </div>
               <div className="form-group">
@@ -315,7 +315,7 @@ const Profile = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Placement Percent <span style={{ color: 'red' }}>*</span></label>
-                <input name="placementPercent" value={formData.placementPercent || ''} onChange={handleChange} />
+                <input name="placementPercent" type='number' value={formData.placementPercent || ''} onChange={handleChange} />
                 {validationErrors.placementPercent && <span className="error-text">{validationErrors.placementPercent}</span>}
               </div>
             </div>
