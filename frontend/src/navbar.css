@@ -1,3 +1,28 @@
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .navbar .links {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .navbar .brand {
+    font-size: 18px;
+  }
+  .navbar a {
+    font-size: 14px;
+  }
+  .navbar .actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+}
 .navbar-header {
   display: flex;
   justify-content: space-between;

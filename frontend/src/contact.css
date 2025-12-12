@@ -99,6 +99,50 @@ main {
     line-height: 1.4;
 }
 
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    main {
+        padding: 12px;
+        background-position: center;
+    }
+    
+    .contact-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .contact-info,
+    .contact-form-section {
+        padding: 20px;
+    }
+    
+    .form-row {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-info,
+    .contact-form-section {
+        padding: 16px;
+    }
+    
+    .contact-icon {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .contact-icon img {
+        width: 25px;
+        height: 25px;
+    }
+}
+
 .enquiry-form {
     flex: 1;
     background: rgba(255, 233, 217, 0.8);

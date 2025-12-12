@@ -1,3 +1,16 @@
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .applications-list,
+  .applications-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+  .application-card {
+    padding: 12px;
+  }
+}
 .applications-container {
   max-width: 1200px;
   margin: 0 auto;
