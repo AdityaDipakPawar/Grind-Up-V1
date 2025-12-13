@@ -22,6 +22,7 @@ api.interceptors.request.use(
     }
     // Remove Content-Type header for FormData to allow multipart/form-data with boundary
     if (config.data instanceof FormData) {
+      console.log('FormData detected, removing Content-Type header');
       delete config.headers['Content-Type'];
     }
     return config;
@@ -163,6 +164,11 @@ export const profileAPI = {
   uploadPlacementRecords: async (file) => {
     const formData = new FormData();
     formData.append('placementRecords', file);
+    
+    // Debug logging
+    console.log('Creating FormData with file:', file.name);
+    console.log('FormData entries:', Array.from(formData.entries()));
+    
     // Let the browser set the Content-Type (with boundary) for multipart requests
     const response = await api.post('/profile/placement-records/upload', formData);
     return response.data;

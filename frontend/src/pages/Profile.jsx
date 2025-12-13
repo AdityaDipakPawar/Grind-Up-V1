@@ -136,6 +136,12 @@ const Profile = () => {
     setUploadingFile(true);
     setMessage('');
     try {
+      // Log for debugging
+      console.log('File to upload:', placementFile);
+      console.log('File name:', placementFile.name);
+      console.log('File type:', placementFile.type);
+      console.log('File size:', placementFile.size);
+
       const res = await profileAPI.uploadPlacementRecords(placementFile);
       if (res.success) {
         setMessage('Placement records uploaded successfully');
@@ -153,6 +159,7 @@ const Profile = () => {
       }
     } catch (error) {
       console.error('Upload error:', error);
+      console.error('Error response:', error.response?.data);
       setMessage('Failed to upload: ' + (error.response?.data?.message || error.message));
     } finally {
       setUploadingFile(false);
