@@ -50,6 +50,12 @@ const collegeSchema = new mongoose.Schema({
   placementRecordUploadedAt: { 
     type: Date 
   },
+  // Admin approval status
+  approvalStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
   
   // // Address Information
   // address: {

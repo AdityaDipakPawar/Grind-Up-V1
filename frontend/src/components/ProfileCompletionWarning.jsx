@@ -61,6 +61,32 @@ const ProfileCompletionWarning = () => {
               ))}
             </ul>
           )}
+          {user?.approvalStatus === 'pending' && (
+            <div style={{
+              marginTop: '12px',
+              padding: '8px 12px',
+              backgroundColor: '#fff3cd',
+              border: '1px solid #ffeaa7',
+              borderRadius: '4px',
+              fontSize: '14px',
+              color: '#856404'
+            }}>
+              <strong>⏳ Admin Approval Pending:</strong> Your profile is awaiting admin approval after completion.
+            </div>
+          )}
+          {user?.approvalStatus === 'rejected' && (
+            <div style={{
+              marginTop: '12px',
+              padding: '8px 12px',
+              backgroundColor: '#f8d7da',
+              border: '1px solid #f5c6cb',
+              borderRadius: '4px',
+              fontSize: '14px',
+              color: '#721c24'
+            }}>
+              <strong>✗ Profile Rejected:</strong> Your profile has been rejected by admin. Please contact admin for details.
+            </div>
+          )}
         </div>
         <div className="warning-actions">
           <button 

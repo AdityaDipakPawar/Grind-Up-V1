@@ -55,7 +55,8 @@ exports.registerCollege = async (req, res) => {
           email: user.email,
           type: user.type,
           collegeName: user.collegeName,
-          profileComplete: false
+          profileComplete: false,
+          approvalStatus: 'pending'
         }
       }
     });
@@ -65,6 +66,53 @@ exports.registerCollege = async (req, res) => {
       message: 'Server error', 
       error: err.message 
     });
+  }
+};
+
+// Admin Registration (protected by ADMIN_SIGNUP_KEY)
+exports.registerAdmin = async (req, res) => {
+  try {
+    const { email, password, adminKey } = req.body;
+
+    if (!process.env.ADMIN_SIGNUP_KEY) {
+      return res.status(500).json({ success: false, message: 'Admin signup is not configured' });
+    }
+    if (!adminKey || adminKey !== process.env.ADMIN_SIGNUP_KEY) {
+      return res.status(403).json({ success: false, message: 'Invalid admin key' });
+    }
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Email already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ email, password: hashedPassword, type: 'admin' });
+    await user.save();
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, type: user.type },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Admin registration successful',
+      data: {
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+          type: user.type,
+        }
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 };
 
@@ -125,7 +173,8 @@ exports.registerCompany = async (req, res) => {
           email: user.email,
           type: user.type,
           companyName: user.companyName,
-          profileComplete: false
+          profileComplete: false,
+          approvalStatus: 'pending'
         }
       }
     });
@@ -172,6 +221,7 @@ exports.login = async (req, res) => {
     const ProfileModel = user.type === 'college' ? College : Company;
     const profile = await ProfileModel.findOne({ user: user._id });
     const profileComplete = isProfileComplete(profile, user.type);
+    const approvalStatus = profile?.approvalStatus || 'pending';
     
     res.json({
       success: true,
@@ -184,7 +234,8 @@ exports.login = async (req, res) => {
           type: user.type,
           collegeName: user.collegeName,
           companyName: user.companyName,
-          profileComplete
+          profileComplete,
+          approvalStatus
         }
       }
     });
@@ -252,6 +303,7 @@ exports.getMe = async (req, res) => {
     const ProfileModel = type === 'college' ? College : Company;
     const profile = await ProfileModel.findOne({ user: id });
     const profileComplete = isProfileComplete(profile, type);
+    const approvalStatus = profile?.approvalStatus || 'pending';
     
     // console.log('getMe - Found user:', user);
     res.json({
@@ -262,7 +314,8 @@ exports.getMe = async (req, res) => {
         type: user.type,
         collegeName: user.collegeName,
         companyName: user.companyName,
-        profileComplete
+        profileComplete,
+        approvalStatus
       }
     });
   } catch (err) {

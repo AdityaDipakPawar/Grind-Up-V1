@@ -15,7 +15,7 @@ const Navbar = () => {
 
   const handleRegisterClick = (type) => {
     if (type === 'college') {
-      navigate('/signup');
+      navigate('/college-signup');
     } else if (type === 'company') {
       navigate('/company-signup');
     }
@@ -59,6 +59,9 @@ const Navbar = () => {
           <div className="authenticated-user">
             <span className="welcome-text">Welcome, {user?.username || user?.collegeName || user?.companyName}</span>
             <NavLink to="/profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Profile</NavLink>
+            {user?.type === 'admin' && (
+              <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Admin</NavLink>
+            )}
             <button className="logout-btn" onClick={handleLogout}>
               Logout
             </button>

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  type: { type: String, enum: ['college', 'company'], required: true },
+  type: { type: String, enum: ['college', 'company', 'admin'], required: true },
   // College specific fields
   collegeName: { type: String },
   contactNo: { type: String },

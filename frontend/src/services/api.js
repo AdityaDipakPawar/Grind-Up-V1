@@ -70,6 +70,12 @@ export const authAPI = {
     return response.data;
   },
 
+  // Admin Registration (requires adminKey)
+  registerAdmin: async (adminData) => {
+    const response = await api.post('/auth/register/admin', adminData);
+    return response.data;
+  },
+
   // Logout
   logout: async () => {
     const response = await api.post('/auth/logout');
@@ -182,4 +188,32 @@ export const profileAPI = {
 };
 
 export default api;
+
+// Admin API endpoints
+export const adminAPI = {
+  getPendingColleges: async (page = 1, limit = 10) => {
+    const response = await api.get(`/admin/pending/colleges?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+  getPendingCompanies: async (page = 1, limit = 10) => {
+    const response = await api.get(`/admin/pending/companies?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+  getApprovedColleges: async (page = 1, limit = 10) => {
+    const response = await api.get(`/admin/approved/colleges?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+  getApprovedCompanies: async (page = 1, limit = 10) => {
+    const response = await api.get(`/admin/approved/companies?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+  setCollegeApproval: async (id, action) => {
+    const response = await api.post(`/admin/colleges/${id}/approval`, { action });
+    return response.data;
+  },
+  setCompanyApproval: async (id, action) => {
+    const response = await api.post(`/admin/companies/${id}/approval`, { action });
+    return response.data;
+  },
+};
 

@@ -11,6 +11,8 @@ const {
 // Registration routes with validation
 router.post('/register/college', validateCollegeRegister, authController.registerCollege);
 router.post('/register/company', validateCompanyRegister, authController.registerCompany);
+// Admin registration (uses ADMIN_SIGNUP_KEY, no public validation middleware)
+router.post('/register/admin', authController.registerAdmin);
 
 // Authentication routes with validation
 router.post('/login', validateLogin, authController.login);

@@ -20,7 +20,7 @@ const Login = () => {
 
   const handleRegisterClick = (type) => {
     if (type === 'college') {
-      navigate('/signup');
+      navigate('/college-signup');
     } else if (type === 'company') {
       navigate('/company-signup');
     }

@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const jobController = require('../controllers/jobController');
 const auth = require('../middleware/auth');
+const authorizeApprovedCompany = require('../middleware/authorizeApprovedCompany');
 
 // Job posting routes (company only)
-router.post('/', auth, jobController.createJob);
+router.post('/', auth, authorizeApprovedCompany, jobController.createJob);
 router.get('/company', auth, jobController.getCompanyJobs);
-router.put('/:id', auth, jobController.updateJob);
-router.delete('/:id', auth, jobController.deleteJob);
+router.put('/:id', auth, authorizeApprovedCompany, jobController.updateJob);
+router.delete('/:id', auth, authorizeApprovedCompany, jobController.deleteJob);
 
 // Job viewing routes (all authenticated users)
 router.get('/', auth, jobController.getAllJobs);

@@ -128,6 +128,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Admin registration function
+  const registerAdmin = async (adminData) => {
+    try {
+      setLoading(true);
+      const response = await authAPI.registerAdmin(adminData);
+      if (response.success) {
+        const { token, user: userData } = response.data;
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        setIsAuthenticated(true);
+        return { success: true, message: response.message };
+      } else {
+        return { success: false, message: response.message };
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Admin registration failed. Please try again.';
+      return { success: false, message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Logout function
   const logout = async () => {
     try {
@@ -171,6 +194,7 @@ export const AuthProvider = ({ children }) => {
     login,
     registerCollege,
     registerCompany,
+    registerAdmin,
     logout,
     updateUser,
     checkProfileCompletion,

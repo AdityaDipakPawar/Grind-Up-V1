@@ -43,6 +43,17 @@ body {
   text-align: center;
 }
 
+/* Reduce top padding on dedicated post-job page so the form starts below the navbar */
+.post-job-page .main-content {
+  padding-top: 260px;
+}
+
+/* Ensure the job form has a little internal top spacing on post-job page */
+.post-job-page .job-form-container {
+  margin-top: 0;
+  padding-top: 20px;
+}
+
 /* Search section */
 .search-section {
   background-color: rgba(255, 255, 255, 0.9);

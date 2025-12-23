@@ -142,6 +142,12 @@ const companySchema = new mongoose.Schema({
   //   type: Boolean, 
   //   default: true 
   // },
+  // Admin approval status
+  approvalStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
   
   // Social Media
   // socialMedia: {

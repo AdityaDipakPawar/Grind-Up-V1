@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts';
 import { profileAPI, authAPI } from '../services/api.js';
-import Footer from '../Footer';
 import '../styles/Profile.css';
 
 const Profile = () => {
@@ -28,6 +27,14 @@ const Profile = () => {
         if (res.success) {
           setFormData(res.data || {});
           setOriginalData(res.data || {});
+          
+          // Update user context with approvalStatus from profile if available
+          if (res.data?.approvalStatus && user) {
+            updateUser({
+              ...user,
+              approvalStatus: res.data.approvalStatus
+            });
+          }
         } else {
           setMessage(res.message || 'Failed to load profile');
         }
@@ -235,10 +242,68 @@ const Profile = () => {
 
   const isCollege = (user?.type === 'college');
 
+  const getApprovalStatusBanner = () => {
+    const approvalStatus = formData.approvalStatus || user?.approvalStatus || 'pending';
+    
+    if (approvalStatus === 'approved') {
+      return (
+        <div style={{
+          backgroundColor: '#d4edda',
+          color: '#155724',
+          padding: '12px 16px',
+          borderRadius: '4px',
+          marginBottom: '20px',
+          border: '1px solid #c3e6cb',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span style={{ fontSize: '20px' }}>✓</span>
+          <strong>Your {isCollege ? 'college' : 'company'} profile has been approved by the admin.</strong>
+        </div>
+      );
+    } else if (approvalStatus === 'rejected') {
+      return (
+        <div style={{
+          backgroundColor: '#f8d7da',
+          color: '#721c24',
+          padding: '12px 16px',
+          borderRadius: '4px',
+          marginBottom: '20px',
+          border: '1px solid #f5c6cb',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span style={{ fontSize: '20px' }}>✗</span>
+          <strong>Your {isCollege ? 'college' : 'company'} profile has been rejected. Please contact admin for more information.</strong>
+        </div>
+      );
+    } else {
+      return (
+        <div style={{
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+          padding: '12px 16px',
+          borderRadius: '4px',
+          marginBottom: '20px',
+          border: '1px solid #ffeaa7',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <span style={{ fontSize: '20px' }}>⏳</span>
+          <strong>Your {isCollege ? 'college' : 'company'} profile is pending admin approval.</strong>
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="container">
       <div style={{ padding: 20, paddingBottom: 0 }}>
         <h2>Profile</h2>
+        {getApprovalStatusBanner()}
         {message && (
           <div className={`message ${message.includes('successfully') ? 'success' : 'error'}`}>{message}</div>
         )}
@@ -473,7 +538,6 @@ const Profile = () => {
         )}
         <button type="submit" className="submit-btn">Save</button>
       </form>
-      <Footer />
     </div>
   );
 };
