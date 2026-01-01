@@ -81,12 +81,12 @@ const validateLogin = [
 
 // Job posting validation
 const validateJobPosting = [
-  body('jobTitle')
+  body('title')
     .trim()
     .notEmpty()
     .withMessage('Job title is required')
-    .isLength({ min: 3, max: 100 })
-    .withMessage('Job title must be between 3 and 100 characters'),
+    .isLength({ min: 3, max: 200 })
+    .withMessage('Job title must be between 3 and 200 characters'),
   body('description')
     .trim()
     .notEmpty()
@@ -94,20 +94,25 @@ const validateJobPosting = [
     .isLength({ min: 20, max: 5000 })
     .withMessage('Description must be between 20 and 5000 characters'),
   body('location')
-    .trim()
-    .notEmpty()
-    .withMessage('Location is required'),
-  body('salary')
     .optional()
-    .matches(/^\d+(-\d+)?$/)
-    .withMessage('Invalid salary format'),
-  body('positions')
+    .custom((value) => {
+      if (typeof value === 'object' && value.city && value.state) {
+        return true;
+      }
+      throw new Error('Location must include city and state');
+    }),
+  body('salary')
+    .optional(),
+  body('vacancies')
+    .optional()
     .isInt({ min: 1, max: 1000 })
-    .withMessage('Positions must be a number between 1 and 1000'),
+    .withMessage('Vacancies must be a number between 1 and 1000'),
   body('jobType')
-    .isIn(['Full-time', 'Part-time', 'Internship', 'Contract'])
+    .optional()
+    .isIn(['full-time', 'part-time', 'contract', 'internship', 'freelance'])
     .withMessage('Invalid job type'),
-  body('deadline')
+  body('applicationDeadline')
+    .optional()
     .isISO8601()
     .withMessage('Invalid deadline date'),
   handleValidationErrors
@@ -164,9 +169,18 @@ const validateInvite = [
 
 // ID parameter validation
 const validateMongoId = [
-  param('id')
-    .isMongoId()
-    .withMessage('Invalid ID format'),
+  param()
+    .custom((value, { req }) => {
+      // Validate any mongo ID parameter in the route (id, jobId, collegeId, applicationId, etc)
+      const paramKeys = Object.keys(req.params);
+      for (const key of paramKeys) {
+        const paramValue = req.params[key];
+        if (!paramValue.match(/^[0-9a-fA-F]{24}$/)) {
+          throw new Error(`Invalid ${key} format`);
+        }
+      }
+      return true;
+    }),
   handleValidationErrors
 ];
 

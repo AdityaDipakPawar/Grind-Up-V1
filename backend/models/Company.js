@@ -142,6 +142,19 @@ const companySchema = new mongoose.Schema({
   //   type: Boolean, 
   //   default: true 
   // },
+  
+  // Social Links (Optional)
+  linkedinProfile: { 
+    type: String,
+    trim: true,
+    default: null
+  },
+  companyWebsite: { 
+    type: String,
+    trim: true,
+    default: null
+  },
+  
   // Admin approval status
   approvalStatus: {
     type: String,

@@ -113,7 +113,13 @@ const JobApplications = () => {
 
       {applications.length === 0 ? (
         <div className="no-applications">
-          <p>No applications received for this job posting yet.</p>
+          <div className="empty-state-icon">📋</div>
+          <h2>No Applications Yet</h2>
+          <p>This job posting hasn't received any applications yet.</p>
+          <p className="empty-hint">Share this job with colleges to start receiving applications.</p>
+          <button className="back-btn" onClick={() => navigate("/home")}>
+            Back to Job Postings
+          </button>
         </div>
       ) : (
         <div className="applications-list">

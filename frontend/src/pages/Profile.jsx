@@ -144,6 +144,8 @@ const Profile = () => {
     setMessage('');
     try {
       // Log for debugging
+      console.log('User type:', user?.type);
+      console.log('User:', user);
       console.log('File to upload:', placementFile);
       console.log('File name:', placementFile.name);
       console.log('File type:', placementFile.type);
@@ -392,6 +394,18 @@ const Profile = () => {
               </div>
             </div>
 
+            {/* Optional Social Links */}
+            <div className="form-row">
+              <div className="form-group">
+                <label>LinkedIn Profile (Optional)</label>
+                <input name="linkedinProfile" type="url" placeholder="https://linkedin.com/company/..." value={formData.linkedinProfile || ''} onChange={handleChange} />
+              </div>
+              <div className="form-group">
+                <label>College Website (Optional)</label>
+                <input name="collegeWebsite" type="url" placeholder="https://example.edu.com" value={formData.collegeWebsite || ''} onChange={handleChange} />
+              </div>
+            </div>
+
             {/* Placement Records Section */}
             <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '2px solid #eee' }}>
               <h3 style={{ marginBottom: '15px' }}>Last 3 Years Placement Records <span style={{ color: 'red' }}>*</span></h3>
@@ -532,6 +546,18 @@ const Profile = () => {
                 <label>Years of Experience <span style={{ color: 'red' }}>*</span></label>
                 <input type="number" name="yearsOfExperience" value={formData.yearsOfExperience || ''} onChange={handleChange} />
                 {validationErrors.yearsOfExperience && <span className="error-text">{validationErrors.yearsOfExperience}</span>}
+              </div>
+            </div>
+
+            {/* Optional Social Links */}
+            <div className="form-row">
+              <div className="form-group">
+                <label>LinkedIn Profile (Optional)</label>
+                <input name="linkedinProfile" type="url" placeholder="https://linkedin.com/company/..." value={formData.linkedinProfile || ''} onChange={handleChange} />
+              </div>
+              <div className="form-group">
+                <label>Company Website (Optional)</label>
+                <input name="companyWebsite" type="url" placeholder="https://example.com" value={formData.companyWebsite || ''} onChange={handleChange} />
               </div>
             </div>
           </>

@@ -11,6 +11,8 @@ const CollegeSignup = () => {
     collegeName: '',
     email: '',
     contactNo: '',
+    linkedinProfile: '',
+    collegeWebsite: '',
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -133,6 +135,22 @@ const CollegeSignup = () => {
               required 
             />
             {errors.contactNo && <span className="error-text">{errors.contactNo}</span>}
+            
+            <input 
+              type="url" 
+              name="linkedinProfile"
+              placeholder="LinkedIn Profile (Optional)" 
+              value={formData.linkedinProfile}
+              onChange={handleInputChange}
+            />
+            
+            <input 
+              type="url" 
+              name="collegeWebsite"
+              placeholder="College Website (Optional)" 
+              value={formData.collegeWebsite}
+              onChange={handleInputChange}
+            />
             
             <button type="submit" disabled={isLoading}>
               {isLoading ? 'Signing up...' : 'Sign up'}

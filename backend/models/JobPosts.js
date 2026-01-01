@@ -76,8 +76,7 @@ const jobPostsSchema = new mongoose.Schema({
   
   // Skills & Requirements
   requiredSkills: [{ 
-    type: String,
-    required: true
+    type: String
   }],
   preferredSkills: [{ 
     type: String 

@@ -3,6 +3,7 @@ const College = require('../models/College');
 const Company = require('../models/Company');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const emailService = require('../services/emailService');
 
 // College Registration
 exports.registerCollege = async (req, res) => {
@@ -37,6 +38,9 @@ exports.registerCollege = async (req, res) => {
       email,
       contactNo
     }).save();
+
+    // Send registration confirmation email
+    await emailService.sendCollegeRegistrationEmail(email, collegeName);
     
     // Generate JWT token
     const token = jwt.sign(
@@ -155,6 +159,9 @@ exports.registerCompany = async (req, res) => {
       companySize,
       location
     }).save();
+
+    // Send registration confirmation email
+    await emailService.sendCompanyRegistrationEmail(email, companyName);
     
     // Generate JWT token
     const token = jwt.sign(

@@ -20,6 +20,9 @@ import ApplicationDetails from "./pages/ApplicationDetails";
 import Profile from "./pages/Profile";
 import Dashboard from "./components/Dashboard";
 import PostJob from "./pages/PostJob";
+import JobDetails from "./pages/JobDetails";
+import Jobs from "./pages/Jobs";
+import AdminAnalyticsPage from "./pages/AdminAnalyticsPage";
 
 function App() {
   return (
@@ -46,7 +49,18 @@ function App() {
               </AdminRoute>
             }
           />
+          <Route
+            path="/admin/analytics"
+            element={
+              <AdminRoute>
+                <AdminAnalyticsPage />
+              </AdminRoute>
+            }
+          />
           <Route path="/dashboard" element={<Dashboard />} />
+          
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
 
           <Route
             path="/job-applications/:jobId"

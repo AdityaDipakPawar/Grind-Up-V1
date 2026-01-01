@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { adminAPI } from '../services/api';
+import OrgDetailModal from '../components/OrgDetailModal';
 
-const Section = ({ title, loader, items, onApprove, onReject, showActions = true }) => (
+const Section = ({ title, loader, items, onApprove, onReject, onViewDetails, showActions = true }) => (
   <div style={{ marginBottom: 32 }}>
     <h2 style={{ marginBottom: 12 }}>{title}</h2>
     {loader ? (
@@ -24,7 +26,7 @@ const Section = ({ title, loader, items, onApprove, onReject, showActions = true
               <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '2px solid #ddd', fontWeight: '600' }}>Email</th>
               <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '2px solid #ddd', fontWeight: '600' }}>Contact</th>
               <th style={{ textAlign: 'left', padding: '12px 8px', borderBottom: '2px solid #ddd', fontWeight: '600' }}>Registered</th>
-              {showActions && <th style={{ padding: '12px 8px', borderBottom: '2px solid #ddd', fontWeight: '600' }}>Actions</th>}
+              <th style={{ padding: '12px 8px', borderBottom: '2px solid #ddd', fontWeight: '600' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -38,37 +40,57 @@ const Section = ({ title, loader, items, onApprove, onReject, showActions = true
                 <td style={{ padding: '12px 8px', borderBottom: '1px solid #f1f1f1' }}>
                   {new Date(it.createdAt).toLocaleString()}
                 </td>
-                {showActions && (
-                  <td style={{ padding: '12px 8px', borderBottom: '1px solid #f1f1f1' }}>
-                    <button 
-                      onClick={() => onApprove(it._id)} 
-                      style={{ 
-                        marginRight: 8, 
-                        padding: '6px 12px', 
-                        backgroundColor: '#4CAF50', 
-                        color: 'white', 
-                        border: 'none', 
-                        borderRadius: '4px', 
-                        cursor: 'pointer' 
-                      }}
-                    >
-                      Approve
-                    </button>
-                    <button 
-                      onClick={() => onReject(it._id)} 
-                      style={{ 
-                        padding: '6px 12px', 
-                        backgroundColor: '#f44336', 
-                        color: 'white', 
-                        border: 'none', 
-                        borderRadius: '4px', 
-                        cursor: 'pointer' 
-                      }}
-                    >
-                      Reject
-                    </button>
-                  </td>
-                )}
+                <td style={{ padding: '12px 8px', borderBottom: '1px solid #f1f1f1' }}>
+                  <button 
+                    onClick={() => onViewDetails(it)} 
+                    style={{ 
+                      marginRight: 8, 
+                      padding: '6px 12px', 
+                      backgroundColor: '#2196F3', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '4px', 
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                    title="View full details"
+                  >
+                    View
+                  </button>
+                  {showActions && (
+                    <>
+                      <button 
+                        onClick={() => onApprove(it._id)} 
+                        style={{ 
+                          marginRight: 8, 
+                          padding: '6px 12px', 
+                          backgroundColor: '#4CAF50', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: '4px', 
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        Approve
+                      </button>
+                      <button 
+                        onClick={() => onReject(it._id)} 
+                        style={{ 
+                          padding: '6px 12px', 
+                          backgroundColor: '#f44336', 
+                          color: 'white', 
+                          border: 'none', 
+                          borderRadius: '4px', 
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        Reject
+                      </button>
+                    </>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -79,6 +101,7 @@ const Section = ({ title, loader, items, onApprove, onReject, showActions = true
 );
 
 const AdminPanel = () => {
+  const navigate = useNavigate();
   const [loadingPendingColleges, setLoadingPendingColleges] = useState(false);
   const [loadingPendingCompanies, setLoadingPendingCompanies] = useState(false);
   const [loadingApprovedColleges, setLoadingApprovedColleges] = useState(false);
@@ -88,6 +111,8 @@ const AdminPanel = () => {
   const [approvedColleges, setApprovedColleges] = useState([]);
   const [approvedCompanies, setApprovedCompanies] = useState([]);
   const [error, setError] = useState('');
+  const [selectedOrg, setSelectedOrg] = useState(null);
+  const [selectedOrgType, setSelectedOrgType] = useState(null);
 
   const loadPendingColleges = async () => {
     try {
@@ -165,10 +190,32 @@ const AdminPanel = () => {
     setPendingCompanies((prev) => prev.filter((c) => c._id !== id));
   };
 
+  const handleViewDetails = (org, type) => {
+    setSelectedOrg(org);
+    setSelectedOrgType(type);
+  };
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#fafafa', paddingBottom: 32 }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 16px' }}>
-        <h1 style={{ marginBottom: 20, paddingTop: 24 }}>Admin Dashboard</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingTop: 24 }}>
+          <h1 style={{ margin: 0 }}>Admin Dashboard</h1>
+          <button 
+            onClick={() => navigate('/admin/analytics')}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            📊 View Analytics
+          </button>
+        </div>
         {error && (
           <div style={{ background: '#fdecea', color: '#b00020', padding: '8px 12px', marginBottom: 16, borderRadius: '4px' }}>
             {error}
@@ -181,6 +228,7 @@ const AdminPanel = () => {
           items={pendingColleges}
           onApprove={approvePendingCollege}
           onReject={rejectPendingCollege}
+          onViewDetails={(org) => handleViewDetails(org, 'college')}
           showActions={true}
         />
 
@@ -190,6 +238,7 @@ const AdminPanel = () => {
           items={pendingCompanies}
           onApprove={approvePendingCompany}
           onReject={rejectPendingCompany}
+          onViewDetails={(org) => handleViewDetails(org, 'company')}
           showActions={true}
         />
 
@@ -199,6 +248,7 @@ const AdminPanel = () => {
             title="Approved Colleges"
             loader={loadingApprovedColleges}
             items={approvedColleges}
+            onViewDetails={(org) => handleViewDetails(org, 'college')}
             showActions={false}
           />
 
@@ -206,10 +256,20 @@ const AdminPanel = () => {
             title="Approved Companies"
             loader={loadingApprovedCompanies}
             items={approvedCompanies}
+            onViewDetails={(org) => handleViewDetails(org, 'company')}
             showActions={false}
           />
         </div>
       </div>
+
+      <OrgDetailModal 
+        organization={selectedOrg} 
+        type={selectedOrgType}
+        onClose={() => {
+          setSelectedOrg(null);
+          setSelectedOrgType(null);
+        }}
+      />
     </div>
   );
 };

@@ -16,10 +16,15 @@ const validateMandatoryFields = (data, userType) => {
   return missingFields;
 };
 
-// Check if data has changed (at least one mandatory field is different)
+// Check if data has changed (at least one field is different - including optional fields)
 const hasDataChanged = (newData, oldData, userType) => {
-  const mandatoryFields = userType === 'college' ? MANDATORY_FIELDS.college : MANDATORY_FIELDS.company;
-  return mandatoryFields.some(field => newData[field] !== oldData[field]);
+  // Check all fields, not just mandatory ones
+  for (const key in newData) {
+    if (newData[key] !== oldData[key]) {
+      return true;
+    }
+  }
+  return false;
 };
 
 exports.createProfile = async (req, res) => {
@@ -147,8 +152,12 @@ exports.deleteProfile = async (req, res) => {
 // Upload placement records (Excel file to Cloudinary)
 exports.uploadPlacementRecords = async (req, res) => {
   try {
+    console.log('uploadPlacementRecords - req.user:', req.user);
+    console.log('uploadPlacementRecords - user type:', req.user?.type);
+    
     // Only colleges can upload placement records
     if (req.user.type !== 'college') {
+      console.log('uploadPlacementRecords - Rejected: user type is', req.user.type);
       return res.status(403).json({ 
         success: false, 
         message: 'Only colleges can upload placement records' 

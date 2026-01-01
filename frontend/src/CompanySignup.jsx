@@ -15,6 +15,8 @@ const CompanySignup = () => {
     industry: '',
     companySize: '',
     location: '',
+    linkedinProfile: '',
+    companyWebsite: '',
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -192,6 +194,22 @@ const CompanySignup = () => {
               required 
             />
             {errors.location && <span className="error-text">{errors.location}</span>}
+            
+            <input 
+              type="url" 
+              name="linkedinProfile"
+              placeholder="LinkedIn Profile (Optional)" 
+              value={formData.linkedinProfile}
+              onChange={handleInputChange}
+            />
+            
+            <input 
+              type="url" 
+              name="companyWebsite"
+              placeholder="Company Website (Optional)" 
+              value={formData.companyWebsite}
+              onChange={handleInputChange}
+            />
             
             <button type="submit" disabled={isLoading}>
               {isLoading ? 'Signing up...' : 'Sign up'}

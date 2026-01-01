@@ -50,12 +50,53 @@
 }
 
 .no-applications {
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 30px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border: 2px dashed #bbb;
+  border-radius: 12px;
+  padding: 60px 30px;
   text-align: center;
+  color: #555;
+  margin: 40px 0;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.no-applications h2 {
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 24px;
+}
+
+.no-applications p {
+  margin: 8px 0;
+  font-size: 15px;
   color: #666;
+}
+
+.empty-hint {
+  font-style: italic;
+  color: #888;
+  margin-top: 15px;
+}
+
+.no-applications .back-btn {
+  margin-top: 25px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.no-applications .back-btn:hover {
+  background-color: #45a049;
 }
 
 .applications-list {

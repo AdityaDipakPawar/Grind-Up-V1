@@ -29,8 +29,13 @@ html {
 body {
   margin: 0;
   padding: 0;
+  padding-top: 90px; /* Account for fixed navbar */
   min-width: 320px;
   min-height: 100%;
+}
+
+.welcome {
+  color: #1a1a1a;
 }
 
 #root {

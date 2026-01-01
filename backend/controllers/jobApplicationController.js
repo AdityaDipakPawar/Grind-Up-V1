@@ -2,6 +2,7 @@ const JobApplication = require('../models/JobApplication');
 const JobPosts = require('../models/JobPosts');
 const College = require('../models/College');
 const Company = require('../models/Company');
+const emailService = require('../services/emailService');
 
 // Apply for a job
 exports.applyForJob = async (req, res) => {
@@ -84,6 +85,30 @@ exports.applyForJob = async (req, res) => {
     });
 
     await application.save();
+
+    // Get company details for email
+    const company = await Company.findById(job.company);
+
+    // Send notification emails
+    if (company && company.email) {
+      await emailService.sendJobApplicationNotification(
+        company.email,
+        company.companyName,
+        req.user.collegeName,
+        job.title
+      );
+    }
+
+    // Send confirmation email to college
+    const college = await College.findOne({ user: req.user.id });
+    if (college && college.email) {
+      await emailService.sendJobApplicationConfirmation(
+        college.email,
+        college.collegeName,
+        job.title,
+        company?.companyName || 'A Company'
+      );
+    }
 
     // Update job post statistics
     await JobPosts.findByIdAndUpdate(jobId, {

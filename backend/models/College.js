@@ -42,6 +42,17 @@ const collegeSchema = new mongoose.Schema({
   avgPlaced: { type: Number },
   placementPercent: { type: String },
   
+  // Social Links (Optional)
+  linkedinProfile: { 
+    type: String,
+    trim: true,
+    default: null
+  },
+  collegeWebsite: { 
+    type: String,
+    trim: true,
+    default: null
+  },
   // Placement Records
   placementRecordUrl: { 
     type: String,

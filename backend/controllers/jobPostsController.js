@@ -36,6 +36,9 @@ exports.createJobPost = async (req, res) => {
       keywords
     } = req.body;
 
+    console.log('createJobPost - req.user:', req.user);
+    console.log('createJobPost - req.body:', req.body);
+
     // Check if user is a company
     if (req.user.type !== 'company') {
       return res.status(403).json({
@@ -44,12 +47,13 @@ exports.createJobPost = async (req, res) => {
       });
     }
 
-    // Verify company exists
-    const company = await Company.findById(req.user.id);
+    // Verify company exists - find by user reference, not by id
+    const company = await Company.findOne({ user: req.user.id });
+    console.log('createJobPost - company found:', company ? 'yes' : 'no');
     if (!company) {
       return res.status(404).json({
         success: false,
-        message: 'Company not found'
+        message: 'Company profile not found. Please complete your profile first.'
       });
     }
 
@@ -58,7 +62,7 @@ exports.createJobPost = async (req, res) => {
       title,
       description,
       shortDescription,
-      company: req.user.id,
+      company: company._id,
       jobType,
       workMode,
       location,
@@ -96,6 +100,15 @@ exports.createJobPost = async (req, res) => {
       data: jobPost
     });
   } catch (error) {
+    console.error('Job posting error:', error);
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed: ' + messages.join(', '),
+        error: error.message
+      });
+    }
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -307,7 +320,19 @@ exports.deleteJobPost = async (req, res) => {
 // Get job posts by company
 exports.getJobPostsByCompany = async (req, res) => {
   try {
-    const companyId = req.params.companyId || req.user.id;
+    let companyId = req.params.companyId;
+
+    // If no companyId param, derive from logged-in user by finding their company profile
+    if (!companyId) {
+      const companyDoc = await Company.findOne({ user: req.user.id }).select('_id');
+      if (!companyDoc) {
+        return res.status(404).json({
+          success: false,
+          message: 'Company profile not found for the current user'
+        });
+      }
+      companyId = companyDoc._id;
+    }
     
     const { page = 1, limit = 10, status } = req.query;
     

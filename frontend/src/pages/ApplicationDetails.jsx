@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts";
+import ApplicationTimeline from "../components/ApplicationTimeline";
 import "../styles/ApplicationDetails.css";
 
 const ApplicationDetails = () => {
@@ -110,6 +111,8 @@ const ApplicationDetails = () => {
           </div>
         </div>
 
+        <ApplicationTimeline application={application} />
+
         <div className="application-details-section">
           <h2>Your Application</h2>
           <div className="detail-card">
@@ -131,47 +134,6 @@ const ApplicationDetails = () => {
                 </a>
               </div>
             )}
-            
-            <div className="status-timeline">
-              <h4>Application Status Timeline</h4>
-              <ul className="timeline">
-                <li className={`timeline-item ${application.status === "pending" || application.status === "reviewing" || application.status === "shortlisted" || application.status === "accepted" || application.status === "rejected" ? "active" : ""}`}>
-                  <div className="timeline-marker"></div>
-                  <div className="timeline-content">
-                    <h5>Application Submitted</h5>
-                    <p>{new Date(application.appliedAt).toLocaleDateString()}</p>
-                  </div>
-                </li>
-                <li className={`timeline-item ${application.status === "reviewing" || application.status === "shortlisted" || application.status === "accepted" || application.status === "rejected" ? "active" : ""}`}>
-                  <div className="timeline-marker"></div>
-                  <div className="timeline-content">
-                    <h5>Under Review</h5>
-                    <p>{application.status === "reviewing" || application.status === "shortlisted" || application.status === "accepted" || application.status === "rejected" ? "Your application is being reviewed" : "Waiting"}</p>
-                  </div>
-                </li>
-                <li className={`timeline-item ${application.status === "shortlisted" || application.status === "accepted" ? "active" : ""}`}>
-                  <div className="timeline-marker"></div>
-                  <div className="timeline-content">
-                    <h5>Shortlisted</h5>
-                    <p>{application.status === "shortlisted" || application.status === "accepted" ? "You've been shortlisted" : "Waiting"}</p>
-                  </div>
-                </li>
-                <li className={`timeline-item ${application.status === "accepted" ? "active" : ""}`}>
-                  <div className="timeline-marker"></div>
-                  <div className="timeline-content">
-                    <h5>Accepted</h5>
-                    <p>{application.status === "accepted" ? "Congratulations! Your application has been accepted" : "Waiting"}</p>
-                  </div>
-                </li>
-                <li className={`timeline-item ${application.status === "rejected" ? "active rejected" : ""}`}>
-                  <div className="timeline-marker"></div>
-                  <div className="timeline-content">
-                    <h5>Not Selected</h5>
-                    <p>{application.status === "rejected" ? "Your application was not selected for this position" : ""}</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>

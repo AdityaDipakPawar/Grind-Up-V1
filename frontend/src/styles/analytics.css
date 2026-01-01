@@ -1,0 +1,343 @@
+/* Admin Analytics Dashboard Styles */
+.analytics-container {
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.analytics-title {
+  color: #333;
+  font-size: 2.2em;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.2em;
+  color: #666;
+}
+
+.error-state {
+  color: #d32f2f;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+  font-size: 3em;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.stat-primary .stat-icon {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.stat-success .stat-icon {
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.stat-info .stat-icon {
+  background: rgba(23, 162, 184, 0.1);
+}
+
+.stat-warning .stat-icon {
+  background: rgba(255, 193, 7, 0.1);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-content h3 {
+  margin: 0 0 8px;
+  color: #666;
+  font-size: 0.95em;
+  font-weight: 500;
+}
+
+.stat-number {
+  margin: 0;
+  font-size: 2.2em;
+  font-weight: 700;
+  color: #333;
+  line-height: 1;
+}
+
+.stat-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 10px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+/* Analytics Sections */
+.analytics-section {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.analytics-section h2 {
+  margin: 0 0 20px;
+  color: #333;
+  font-size: 1.6em;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Approval Grid */
+.approval-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.approval-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.approval-card h3 {
+  margin: 0 0 15px;
+  color: #333;
+  font-size: 1.3em;
+}
+
+.approval-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.approval-stat {
+  flex: 1;
+  text-align: center;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+}
+
+.approval-stat .label {
+  display: block;
+  font-size: 0.85em;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.approval-stat .value {
+  display: block;
+  font-size: 1.8em;
+  font-weight: 700;
+}
+
+.approval-stat .value.pending {
+  color: #ff9800;
+}
+
+.approval-stat .value.approved {
+  color: #28a745;
+}
+
+.approval-stat .value.rejected {
+  color: #dc3545;
+}
+
+/* Jobs Breakdown */
+.jobs-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.breakdown-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.breakdown-card h4 {
+  margin: 0 0 15px;
+  color: #333;
+  font-size: 1.2em;
+}
+
+.breakdown-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: white;
+  border-radius: 8px;
+}
+
+.breakdown-item span {
+  color: #666;
+  text-transform: capitalize;
+}
+
+.breakdown-item strong {
+  color: #333;
+  font-size: 1.2em;
+}
+
+/* Application Status Grid */
+.application-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.status-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.status-card h4 {
+  margin: 0 0 10px;
+  font-size: 1em;
+  opacity: 0.9;
+}
+
+.status-count {
+  margin: 0;
+  font-size: 2.5em;
+  font-weight: 700;
+}
+
+/* Top Performers */
+.top-performers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+}
+
+.top-list h3 {
+  margin: 0 0 15px;
+  color: #333;
+  font-size: 1.2em;
+}
+
+.top-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.top-list li {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: background 0.3s ease;
+}
+
+.top-list li:hover {
+  background: #e9ecef;
+}
+
+.top-list .rank {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #667eea;
+  min-width: 35px;
+}
+
+.top-list .name {
+  flex: 1;
+  color: #333;
+  font-weight: 500;
+}
+
+.top-list .count {
+  color: #666;
+  font-size: 0.9em;
+  background: white;
+  padding: 5px 12px;
+  border-radius: 15px;
+}
+
+.top-list .empty {
+  text-align: center;
+  color: #999;
+  padding: 30px 20px;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .analytics-title {
+    font-size: 1.8em;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .stat-icon {
+    font-size: 2.5em;
+    width: 60px;
+    height: 60px;
+  }
+
+  .approval-stats {
+    flex-direction: column;
+  }
+
+  .top-performers-grid {
+    grid-template-columns: 1fr;
+  }
+}

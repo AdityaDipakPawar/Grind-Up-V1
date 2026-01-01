@@ -3,9 +3,13 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const authorizeAdmin = require('../middleware/authorizeAdmin');
 const adminController = require('../controllers/adminController');
+const analyticsController = require('../controllers/analyticsController');
 
 // All routes below require admin
 router.use(auth, authorizeAdmin);
+
+// Analytics route
+router.get('/analytics', analyticsController.getAnalytics);
 
 // GET /api/admin/pending/colleges
 router.get('/pending/colleges', (req, res, next) => {

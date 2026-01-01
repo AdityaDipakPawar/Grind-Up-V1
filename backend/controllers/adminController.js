@@ -1,5 +1,6 @@
 const College = require('../models/College');
 const Company = require('../models/Company');
+const emailService = require('../services/emailService');
 
 // List pending registrations
 exports.listPending = async (req, res) => {
@@ -67,6 +68,15 @@ exports.setApproval = async (req, res) => {
 
     doc.approvalStatus = action === 'approve' ? 'approved' : 'rejected';
     await doc.save();
+
+    // Send approval/rejection email
+    if (action === 'approve') {
+      if (type === 'colleges') {
+        await emailService.sendCollegeApprovalEmail(doc.email, doc.collegeName);
+      } else {
+        await emailService.sendCompanyApprovalEmail(doc.email, doc.companyName);
+      }
+    }
 
     res.json({ success: true, message: `Successfully ${action}d`, data: { id: doc._id, approvalStatus: doc.approvalStatus } });
   } catch (err) {

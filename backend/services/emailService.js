@@ -1,0 +1,531 @@
+const nodemailer = require('nodemailer');
+
+// Create email transporter
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: process.env.SMTP_PORT || 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
+
+// Normalize the frontend URL to avoid double slashes when composing links
+const frontendBaseUrl = (process.env.FRONTEND_URL).replace(/\/+$/, '');
+
+/**
+ * Send registration confirmation email to college
+ */
+const sendCollegeRegistrationEmail = async (email, collegeName) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: 'Welcome to Grind Up - College Registration Confirmation',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px; text-align: center; }
+            .content { padding: 20px 0; }
+            .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+            .btn { display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Welcome to Grind Up! 🎓</h1>
+            </div>
+            <div class="content">
+              <p>Dear <strong>${collegeName}</strong>,</p>
+              <p>Thank you for registering with Grind Up! We're excited to have you on board.</p>
+              
+              <h3>What Happens Next?</h3>
+              <ol>
+                <li>Our team will verify your college details</li>
+                <li>You'll receive an approval email within 24-48 hours</li>
+                <li>Once approved, you can start exploring job opportunities</li>
+              </ol>
+              
+              <p>In the meantime, you can:</p>
+              <ul>
+                <li>Complete your college profile</li>
+                <li>Add student details and placement records</li>
+                <li>Explore available internships and jobs</li>
+              </ul>
+              
+              <p><a href="${frontendBaseUrl}/login" class="btn">Login to Your Account</a></p>
+              
+              <hr>
+              <p><strong>Need Help?</strong> Contact us at support@grindup.co</p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2024 Grind Up. All rights reserved.</p>
+              <p>Verified Two-Sided Placement Platform</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Registration email sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending registration email to ${email}:`, error);
+    return false;
+  }
+};
+
+/**
+ * Send registration confirmation email to company
+ */
+const sendCompanyRegistrationEmail = async (email, companyName) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: 'Welcome to Grind Up - Company Registration Confirmation',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px; text-align: center; }
+            .content { padding: 20px 0; }
+            .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+            .btn { display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Welcome to Grind Up! 🚀</h1>
+            </div>
+            <div class="content">
+              <p>Dear <strong>${companyName}</strong>,</p>
+              <p>Thank you for registering with Grind Up! We're thrilled to partner with you.</p>
+              
+              <h3>What Happens Next?</h3>
+              <ol>
+                <li>Our team will verify your company details</li>
+                <li>You'll receive an approval email within 24-48 hours</li>
+                <li>Once approved, you can start posting job opportunities</li>
+              </ol>
+              
+              <p>Benefits of posting on Grind Up:</p>
+              <ul>
+                <li>Access to verified colleges and students</li>
+                <li>Streamlined hiring process</li>
+                <li>Direct communication with institutions</li>
+                <li>Transparent and scam-free environment</li>
+              </ul>
+              
+              <p><a href="${frontendBaseUrl}/login" class="btn">Login to Your Account</a></p>
+              
+              <hr>
+              <p><strong>Questions?</strong> Contact us at support@grindup.co</p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2024 Grind Up. All rights reserved.</p>
+              <p>Verified Two-Sided Placement Platform</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Registration email sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending registration email to ${email}:`, error);
+    return false;
+  }
+};
+
+/**
+ * Send approval confirmation email to college
+ */
+const sendCollegeApprovalEmail = async (email, collegeName) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: '✅ Your College Has Been Approved on Grind Up!',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px; text-align: center; }
+            .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            .content { padding: 20px 0; }
+            .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+            .btn { display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Approval Confirmed! 🎉</h1>
+            </div>
+            <div class="success">
+              <p>Your college <strong>${collegeName}</strong> has been approved and verified on Grind Up!</p>
+            </div>
+            <div class="content">
+              <p>You now have access to:</p>
+              <ul>
+                <li>✅ Browse all available job opportunities</li>
+                <li>✅ Apply to internships and positions</li>
+                <li>✅ Track your applications</li>
+                <li>✅ Receive placement invitations from companies</li>
+              </ul>
+              
+              <p>Start exploring opportunities now!</p>
+              <p><a href="${frontendBaseUrl}/home" class="btn">View Jobs</a></p>
+              
+              <hr>
+              <p>Thank you for being part of the verified Grind Up community!</p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2024 Grind Up. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Approval email sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending approval email to ${email}:`, error);
+    return false;
+  }
+};
+
+/**
+ * Send approval confirmation email to company
+ */
+const sendCompanyApprovalEmail = async (email, companyName) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: '✅ Your Company Has Been Approved on Grind Up!',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px; text-align: center; }
+            .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            .content { padding: 20px 0; }
+            .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+            .btn { display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Approval Confirmed! 🎉</h1>
+            </div>
+            <div class="success">
+              <p>Your company <strong>${companyName}</strong> has been approved and verified on Grind Up!</p>
+            </div>
+            <div class="content">
+              <p>You're now ready to:</p>
+              <ul>
+                <li>✅ Post job opportunities</li>
+                <li>✅ Connect with verified colleges</li>
+                <li>✅ Receive applications from students</li>
+                <li>✅ Manage your recruitment process</li>
+              </ul>
+              
+              <p>Start posting your first job now!</p>
+              <p><a href="${frontendBaseUrl}/post-job" class="btn">Post a Job</a></p>
+              
+              <hr>
+              <p>Welcome to the verified Grind Up community!</p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2024 Grind Up. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Approval email sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending approval email to ${email}:`, error);
+    return false;
+  }
+};
+
+/**
+ * Send job application notification to company
+ */
+const sendJobApplicationNotification = async (email, companyName, studentName, jobTitle) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: `📋 New Application for ${jobTitle} - Grind Up`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px; text-align: center; }
+            .content { padding: 20px 0; }
+            .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+            .btn { display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>New Application Received! 📋</h1>
+            </div>
+            <div class="content">
+              <p>Hello <strong>${companyName}</strong>,</p>
+              <p><strong>${studentName}</strong> has applied for the position of <strong>${jobTitle}</strong>.</p>
+              
+              <p>Review the application and take action:</p>
+              <p><a href="${frontendBaseUrl}/dashboard" class="btn">View Applications</a></p>
+              
+              <hr>
+              <p>Keep track of all your applications in your Grind Up dashboard.</p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2024 Grind Up. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Application notification sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending application notification to ${email}:`, error);
+    return false;
+  }
+};
+
+/**
+ * Send job application confirmation to student
+ */
+const sendJobApplicationConfirmation = async (email, studentName, jobTitle, companyName) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: `✅ Application Submitted - ${jobTitle} at ${companyName}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px; text-align: center; }
+            .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            .content { padding: 20px 0; }
+            .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+            .btn { display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Application Submitted! ✅</h1>
+            </div>
+            <div class="success">
+              <p>Your application for <strong>${jobTitle}</strong> at <strong>${companyName}</strong> has been submitted successfully!</p>
+            </div>
+            <div class="content">
+              <p>Dear <strong>${studentName}</strong>,</p>
+              <p>We've received your application. The company will review it and get back to you soon.</p>
+              
+              <p>Track your application status:</p>
+              <p><a href="${frontendBaseUrl}/my-applications" class="btn">View My Applications</a></p>
+              
+              <hr>
+              <p>Best of luck with your application!</p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2024 Grind Up. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Application confirmation sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending application confirmation to ${email}:`, error);
+    return false;
+  }
+};
+
+/**
+ * Send rejection email
+ */
+const sendRejectionEmail = async (email, candidateName, jobTitle, companyName) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: `Application Update - ${jobTitle} at ${companyName}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px; text-align: center; }
+            .content { padding: 20px 0; }
+            .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+            .btn { display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Application Update</h1>
+            </div>
+            <div class="content">
+              <p>Dear <strong>${candidateName}</strong>,</p>
+              <p>Thank you for applying for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>. After careful review, we regret to inform you that your application has not been selected for this position.</p>
+              
+              <p>We encourage you to apply for other opportunities on Grind Up that match your profile!</p>
+              <p><a href="${frontendBaseUrl}/jobs" class="btn">Explore More Jobs</a></p>
+              
+              <hr>
+              <p>All the best with your career!</p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2024 Grind Up. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Rejection email sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending rejection email to ${email}:`, error);
+    return false;
+  }
+};
+
+/**
+ * Send weekly digest email to colleges
+ */
+const sendWeeklyDigest = async (email, collegeName, newJobs) => {
+  try {
+    const jobsList = newJobs
+      .map(
+        (job) =>
+          `<li><strong>${job.title}</strong> at ${job.companyName} - ${job.location}</li>`
+      )
+      .join('');
+
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: `📊 Your Weekly Job Digest - Grind Up`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px; text-align: center; }
+            .content { padding: 20px 0; }
+            .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+            .btn { display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; }
+            .job-list { background-color: #f9f9f9; padding: 15px; border-left: 4px solid #667eea; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>📊 Weekly Job Digest</h1>
+            </div>
+            <div class="content">
+              <p>Hello <strong>${collegeName}</strong>,</p>
+              <p>Here are the top new job opportunities for this week:</p>
+              
+              <div class="job-list">
+                <ul>
+                  ${jobsList}
+                </ul>
+              </div>
+              
+              <p>Don't miss out! Check out all available jobs:</p>
+              <p><a href="${frontendBaseUrl}/jobs" class="btn">View All Jobs</a></p>
+              
+              <hr>
+              <p>Happy applying!</p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2024 Grind Up. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Weekly digest sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending weekly digest to ${email}:`, error);
+    return false;
+  }
+};
+
+module.exports = {
+  sendCollegeRegistrationEmail,
+  sendCompanyRegistrationEmail,
+  sendCollegeApprovalEmail,
+  sendCompanyApprovalEmail,
+  sendJobApplicationNotification,
+  sendJobApplicationConfirmation,
+  sendRejectionEmail,
+  sendWeeklyDigest,
+};
