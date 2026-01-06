@@ -184,6 +184,45 @@
   line-height: 1.5;
 }
 
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.detail-grid div {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.detail-grid strong {
+  color: #333;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.cover-letter-text {
+  white-space: pre-line;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #667eea;
+}
+
+.link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
 .resume-link {
   display: inline-block;
   background-color: #f04e23;
@@ -242,6 +281,132 @@
   cursor: default;
 }
 
+/* Compact Application Card Styles */
+.application-card-compact {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  transition: box-shadow 0.3s;
+}
+
+.application-card-compact:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.applicant-info-compact {
+  flex: 1;
+}
+
+.college-name-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.college-name-section h3 {
+  color: #333;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.application-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.application-meta p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.application-meta strong {
+  color: #333;
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+.application-actions-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: flex-end;
+  min-width: 200px;
+}
+
+.view-details-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.view-details-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.status-update-section {
+  width: 100%;
+}
+
+.status-update-section h4 {
+  color: #555;
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-buttons-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.status-buttons-compact .status-btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s;
+  text-align: left;
+}
+
+.status-buttons-compact .status-btn:hover:not(:disabled) {
+  background-color: #e9ecef;
+  border-color: #bbb;
+}
+
+.status-buttons-compact .status-btn.active {
+  border-color: #667eea;
+  background-color: #667eea;
+  color: white;
+  font-weight: 500;
+}
+
+.status-buttons-compact .status-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .application-card {
@@ -254,5 +419,37 @@
     border-bottom: 1px solid #eee;
     padding-bottom: 15px;
     margin-bottom: 15px;
+  }
+
+  .application-card-compact {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .application-actions-compact {
+    align-items: stretch;
+    min-width: auto;
+  }
+
+  .status-buttons-compact {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .status-buttons-compact .status-btn {
+    flex: 1;
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .college-name-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .view-details-btn {
+    width: 100%;
   }
 }

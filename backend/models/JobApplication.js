@@ -35,17 +35,19 @@ const jobApplicationSchema = new mongoose.Schema({
     type: String 
   },
   
-  // Student Information
+  // Student Information (Optional - for future individual student applications)
+  // Currently, colleges apply on behalf of their students, so this entire field is optional
+  // When colleges add individual student profiles in the future, they can include studentDetails
   studentDetails: {
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    phone: { type: String, required: true },
-    course: { type: String, required: true },
-    specialization: { type: String },
-    currentYear: { type: String },
-    expectedGraduation: { type: Date },
-    cgpa: { type: String },
-    percentage: { type: String }
+    name: { type: String, required: false },
+    email: { type: String, required: false },
+    phone: { type: String, required: false },
+    course: { type: String, required: false },
+    specialization: { type: String, required: false },
+    currentYear: { type: String, required: false },
+    expectedGraduation: { type: Date, required: false },
+    cgpa: { type: String, required: false },
+    percentage: { type: String, required: false }
   },
   
   // Academic Information

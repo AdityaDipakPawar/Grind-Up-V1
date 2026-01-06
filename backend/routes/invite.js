@@ -4,6 +4,9 @@ const inviteController = require('../controllers/inviteController');
 const auth = require('../middleware/auth');
 const { validateMongoId } = require('../middleware/validation');
 
+// Send invite to college (company)
+router.post('/send', auth, inviteController.sendInvite);
+
 // Get invites for college
 router.get('/college', auth, inviteController.getCollegeInvites);
 
@@ -19,8 +22,5 @@ router.get('/:id', auth, validateMongoId, inviteController.getInviteById);
 
 // Delete invite (company only)
 router.delete('/:id', auth, validateMongoId, inviteController.deleteInvite);
-
-module.exports = router;
-
 
 module.exports = router; 

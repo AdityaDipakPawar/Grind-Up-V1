@@ -2,19 +2,44 @@ import React from "react";
 import "../styles/timeline.css";
 
 const ApplicationTimeline = ({ application }) => {
+  if (!application) {
+    return null;
+  }
+
   const getStatusSteps = () => {
+    const status = application.status || "applied";
+    
     const steps = [
-      { label: "Applied", status: "applied", date: application.appliedAt },
-      { label: "Under Review", status: "under-review", date: application.reviewedAt },
-      { label: "Interview", status: "interview", date: application.interviewAt },
-      { label: application.status === "rejected" ? "Rejected" : "Hired", status: application.status, date: application.finalizedAt },
+      { label: "Applied", status: "applied", date: application.appliedAt || application.createdAt },
+      { label: "Under Review", status: "under-review", date: application.reviewedAt || application.processTracking?.underReview },
+      { label: "Interview", status: "interview", date: application.interviewAt || application.processTracking?.interviewScheduled },
+      { 
+        label: status === "rejected" ? "Rejected" : status === "accepted" ? "Accepted" : "Final Decision", 
+        status: status === "rejected" ? "rejected" : status === "accepted" ? "accepted" : "final", 
+        date: application.finalizedAt || application.processTracking?.finalDecision 
+      },
     ];
 
-    const currentStatusIndex = steps.findIndex(step => step.status === application.status);
+    // Map status to step indices
+    const statusIndexMap = {
+      "applied": 0,
+      "pending": 0,
+      "under-review": 1,
+      "reviewing": 1,
+      "shortlisted": 1,
+      "interview-scheduled": 2,
+      "interviewed": 2,
+      "interview": 2,
+      "accepted": 3,
+      "rejected": 3,
+      "withdrawn": -1
+    };
+
+    const currentStatusIndex = statusIndexMap[status] !== undefined ? statusIndexMap[status] : 0;
     
     return steps.map((step, index) => ({
       ...step,
-      completed: index <= currentStatusIndex,
+      completed: currentStatusIndex >= 0 && index <= currentStatusIndex,
       current: index === currentStatusIndex,
     }));
   };

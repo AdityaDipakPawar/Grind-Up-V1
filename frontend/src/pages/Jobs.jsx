@@ -89,7 +89,7 @@ const Jobs = () => {
     }
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/job-applications/${jobId}`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/job-applications/apply/${jobId}`,
         {
           method: "POST",
           headers: {
@@ -97,20 +97,44 @@ const Jobs = () => {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
           body: JSON.stringify({
-            coverLetter: "Interested in this position",
-            resume: "resume_url_here",
+            // Cover letter and resume are optional for college applications
+            // Colleges apply on behalf of their students
+            coverLetter: "",
+            resume: "",
           }),
         }
       );
-      const data = await response.json();
-      if (data?.success) {
+      
+      // Always try to parse JSON, even if status is not ok
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error("Failed to parse response:", parseError);
+        alert("Server error: Invalid response format");
+        return;
+      }
+      
+      if (response.ok && data?.success) {
         alert("Application submitted successfully!");
         fetchAppliedJobs();
       } else {
-        alert(data?.message || "Failed to apply. Please try again.");
+        // Show the actual error message from the backend
+        const errorMessage = data?.message || data?.error || `Failed to apply. Status: ${response.status}`;
+        alert(errorMessage);
+        console.error("Application failed - Full response:", {
+          status: response.status,
+          statusText: response.statusText,
+          data: data
+        });
       }
     } catch (err) {
-      alert("Failed to apply. Please try again.");
+      console.error("Error applying for job:", err);
+      console.error("Error details:", {
+        message: err.message,
+        stack: err.stack
+      });
+      alert(`Network error: ${err.message || "Failed to apply. Please try again."}`);
     }
   };
 

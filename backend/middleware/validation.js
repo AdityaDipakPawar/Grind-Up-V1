@@ -119,18 +119,34 @@ const validateJobPosting = [
 ];
 
 // Job application validation
+// Note: For college applications, cover letter and resume are optional
+// Colleges apply on behalf of their students, not individual student applications
 const validateJobApplication = [
-  body('jobId')
-    .isMongoId()
-    .withMessage('Invalid job ID'),
-  body('resumeUrl')
-    .trim()
-    .notEmpty()
-    .withMessage('Resume URL is required'),
+  // jobId comes from route params, not body
+  body('resume')
+    .optional()
+    .trim(),
   body('coverLetter')
+    .optional()
     .trim()
-    .isLength({ min: 10, max: 2000 })
-    .withMessage('Cover letter must be between 10 and 2000 characters'),
+    .custom((value) => {
+      // If cover letter is provided, it must be between 10 and 2000 characters
+      if (value && value.length > 0) {
+        if (value.length < 10 || value.length > 2000) {
+          throw new Error('Cover letter must be between 10 and 2000 characters if provided');
+        }
+      }
+      return true;
+    }),
+  // Allow other optional fields - these are for individual student applications (future feature)
+  body('studentDetails').optional(),
+  body('academicInfo').optional(),
+  body('skills').optional(),
+  body('technicalSkills').optional(),
+  body('projects').optional(),
+  body('internships').optional(),
+  body('additionalInfo').optional(),
+  body('documents').optional(),
   handleValidationErrors
 ];
 

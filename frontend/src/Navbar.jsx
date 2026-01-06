@@ -50,8 +50,20 @@ const Navbar = () => {
       </div>
       <nav className="navigation">
         <NavLink to="/home" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Home</NavLink>
-        <NavLink to="/placements" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Placements</NavLink>
-        <NavLink to="/invite" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Invites</NavLink>
+        
+        {/* Show different menu items based on user type */}
+        {isAuthenticated && user?.type === 'college' && (
+          <>
+            <NavLink to="/jobs" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>All Jobs</NavLink>
+            <NavLink to="/applied-jobs" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Applied Jobs</NavLink>
+            <NavLink to="/invite" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Invitations</NavLink>
+          </>
+        )}
+        
+        {isAuthenticated && user?.type === 'company' && (
+          <NavLink to="/invite" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Invites</NavLink>
+        )}
+        
         <NavLink to="/contact" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Contact us</NavLink>
       </nav>
       <div className="user-actions">

@@ -23,6 +23,8 @@ import PostJob from "./pages/PostJob";
 import JobDetails from "./pages/JobDetails";
 import Jobs from "./pages/Jobs";
 import AdminAnalyticsPage from "./pages/AdminAnalyticsPage";
+import CollegeDetails from "./pages/CollegeDetails";
+import AppliedJobs from "./pages/AppliedJobs";
 
 function App() {
   return (
@@ -61,6 +63,7 @@ function App() {
           
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/jobs/:id" element={<JobDetails />} />
+          <Route path="/applied-jobs" element={<AppliedJobs />} />
 
           <Route
             path="/job-applications/:jobId"
@@ -70,6 +73,7 @@ function App() {
             path="/job-applications/view/:applicationId"
             element={<ApplicationDetails />}
           />
+          <Route path="/college-details/:collegeId" element={<CollegeDetails />} />
           <Route path="/post-job" element={<PostJob />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>

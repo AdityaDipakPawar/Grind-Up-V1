@@ -1,6 +1,89 @@
 const Invite = require('../models/Invite');
 const Job = require('../models/Job');
 const JobApplication = require('../models/JobApplication');
+const College = require('../models/College');
+const JobPosts = require('../models/JobPosts');
+
+// Send invite to college (company invites college for a job)
+exports.sendInvite = async (req, res) => {
+  try {
+    const { collegeId, jobId, message } = req.body;
+
+    // Check if user is a company
+    if (req.user.type !== 'company') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only companies can send invites'
+      });
+    }
+
+    // Check if college exists
+    const college = await College.findById(collegeId);
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: 'College not found'
+      });
+    }
+
+    // Check if job exists and belongs to the company
+    const job = await JobPosts.findById(jobId);
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: 'Job not found'
+      });
+    }
+
+    if (job.company.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to send invite for this job'
+      });
+    }
+
+    // Check if invite already exists
+    const existingInvite = await Invite.findOne({
+      college: collegeId,
+      job: jobId,
+      company: req.user.id
+    });
+
+    if (existingInvite) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invite already sent to this college for this job'
+      });
+    }
+
+    // Create invite
+    const invite = new Invite({
+      college: collegeId,
+      job: jobId,
+      company: req.user.id,
+      message: message || `You have been invited to apply for ${job.title}`,
+      status: 'pending'
+    });
+
+    await invite.save();
+
+    const populatedInvite = await Invite.findById(invite._id)
+      .populate('college', 'collegeName email')
+      .populate('job', 'title');
+
+    res.status(201).json({
+      success: true,
+      message: 'Invite sent successfully',
+      data: populatedInvite
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: err.message
+    });
+  }
+};
 
 // Get invites for a college
 exports.getCollegeInvites = async (req, res) => {

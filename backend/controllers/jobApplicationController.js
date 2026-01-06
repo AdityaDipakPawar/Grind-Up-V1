@@ -7,6 +7,11 @@ const emailService = require('../services/emailService');
 // Apply for a job
 exports.applyForJob = async (req, res) => {
   try {
+    console.log('=== APPLY FOR JOB REQUEST ===');
+    console.log('User:', req.user);
+    console.log('Job ID:', req.params.jobId);
+    console.log('Request body:', req.body);
+
     const {
       coverLetter,
       resume,
@@ -20,13 +25,42 @@ exports.applyForJob = async (req, res) => {
       documents
     } = req.body;
 
+    // Remove studentDetails if it's empty or incomplete (for college applications)
+    // Colleges don't need to provide studentDetails - they apply on behalf of students
+
     const jobId = req.params.jobId;
 
+    // Debug: Log user information
+    console.log('=== USER TYPE CHECK ===');
+    console.log('req.user:', JSON.stringify(req.user, null, 2));
+    console.log('req.user.type:', req.user.type);
+    console.log('Type of req.user.type:', typeof req.user.type);
+
     // Check if user is a college
-    if (req.user.type !== 'college') {
+    if (!req.user || req.user.type !== 'college') {
       return res.status(403).json({
         success: false,
-        message: 'Only colleges can apply for jobs'
+        message: `Only colleges can apply for jobs. Current user type: ${req.user?.type || 'unknown'}`,
+        debug: {
+          userType: req.user?.type,
+          user: req.user
+        }
+      });
+    }
+
+    // Check if college is approved/verified
+    const college = await College.findOne({ user: req.user.id });
+    if (!college) {
+      return res.status(404).json({
+        success: false,
+        message: 'College profile not found'
+      });
+    }
+
+    if (college.approvalStatus !== 'approved') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your college account is not yet approved. Please wait for admin approval before applying to jobs.'
       });
     }
 
@@ -58,7 +92,7 @@ exports.applyForJob = async (req, res) => {
     // Check if already applied
     const existingApplication = await JobApplication.findOne({
       job: jobId,
-      applicant: req.user.id
+      applicant: college._id
     });
 
     if (existingApplication) {
@@ -69,45 +103,92 @@ exports.applyForJob = async (req, res) => {
     }
 
     // Create application
-    const application = new JobApplication({
+    // Note: College applications don't require cover letter, resume, or studentDetails
+    // Colleges apply on behalf of their students
+    // studentDetails will be added in future when colleges can add individual student profiles
+    const applicationData = {
       job: jobId,
-      applicant: req.user.id,
-      coverLetter,
-      resume,
-      studentDetails,
-      academicInfo,
-      skills,
-      technicalSkills,
-      projects,
-      internships,
-      additionalInfo,
-      documents
-    });
+      applicant: college._id
+    };
 
+    // Only include cover letter if provided (optional for college applications)
+    if (coverLetter && coverLetter.trim().length > 0) {
+      applicationData.coverLetter = coverLetter.trim();
+    }
+
+    // Only include resume if provided (optional for college applications)
+    if (resume && resume.trim().length > 0) {
+      applicationData.resume = resume.trim();
+    }
+
+    // Only include studentDetails if ALL required fields are provided
+    // This is for future functionality where colleges can add individual student profiles
+    if (studentDetails && 
+        studentDetails.name && 
+        studentDetails.email && 
+        studentDetails.phone && 
+        studentDetails.course) {
+      applicationData.studentDetails = studentDetails;
+    }
+    // Don't include studentDetails if any required field is missing
+
+    // Other optional fields for future use
+    if (academicInfo && Object.keys(academicInfo).length > 0) {
+      applicationData.academicInfo = academicInfo;
+    }
+    if (skills && Array.isArray(skills) && skills.length > 0) {
+      applicationData.skills = skills;
+    }
+    if (technicalSkills && Array.isArray(technicalSkills) && technicalSkills.length > 0) {
+      applicationData.technicalSkills = technicalSkills;
+    }
+    if (projects && Array.isArray(projects) && projects.length > 0) {
+      applicationData.projects = projects;
+    }
+    if (internships && Array.isArray(internships) && internships.length > 0) {
+      applicationData.internships = internships;
+    }
+    if (additionalInfo && Object.keys(additionalInfo).length > 0) {
+      applicationData.additionalInfo = additionalInfo;
+    }
+    if (documents) {
+      applicationData.documents = documents;
+    }
+
+    const application = new JobApplication(applicationData);
     await application.save();
 
     // Get company details for email
     const company = await Company.findById(job.company);
 
-    // Send notification emails
-    if (company && company.email) {
-      await emailService.sendJobApplicationNotification(
-        company.email,
-        company.companyName,
-        req.user.collegeName,
-        job.title
-      );
+    // Send notification emails (optional - only if email service is configured)
+    try {
+      if (company && company.email) {
+        await emailService.sendJobApplicationNotification(
+          company.email,
+          company.companyName,
+          college.collegeName,
+          job.title
+        );
+      }
+    } catch (emailError) {
+      console.error('Failed to send notification email to company:', emailError);
+      // Don't fail the application if email fails
     }
 
-    // Send confirmation email to college
-    const college = await College.findOne({ user: req.user.id });
-    if (college && college.email) {
-      await emailService.sendJobApplicationConfirmation(
-        college.email,
-        college.collegeName,
-        job.title,
-        company?.companyName || 'A Company'
-      );
+    // Send confirmation email to college (optional)
+    try {
+      if (college && college.email) {
+        await emailService.sendJobApplicationConfirmation(
+          college.email,
+          college.collegeName,
+          job.title,
+          company?.companyName || 'A Company'
+        );
+      }
+    } catch (emailError) {
+      console.error('Failed to send confirmation email to college:', emailError);
+      // Don't fail the application if email fails
     }
 
     // Update job post statistics
@@ -125,10 +206,26 @@ exports.applyForJob = async (req, res) => {
       data: application
     });
   } catch (error) {
+    console.error('Error applying for job:', error);
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
+    });
+    
+    // Check if it's a validation error
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors || {}).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error: ' + validationErrors.join(', '),
+        errors: validationErrors
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Server error',
-      error: error.message
+      message: error.message || 'Server error while processing application'
     });
   }
 };
@@ -137,22 +234,55 @@ exports.applyForJob = async (req, res) => {
 exports.getJobApplications = async (req, res) => {
   try {
     const jobId = req.params.jobId;
+    console.log('=== GET JOB APPLICATIONS ===');
+    console.log('Job ID:', jobId);
+    console.log('User:', req.user);
 
     // Check if job exists and user owns it
-    const job = await JobPosts.findById(jobId);
+    const job = await JobPosts.findById(jobId).populate('company', 'user companyName');
     if (!job) {
+      console.log('Job not found');
       return res.status(404).json({
         success: false,
         message: 'Job post not found'
       });
     }
 
-    if (job.company.toString() !== req.user.id) {
+    console.log('Job found:', {
+      jobCompanyId: job.company?._id,
+      jobCompanyUserId: job.company?.user,
+      reqUserId: req.user.id,
+      userType: req.user.type
+    });
+
+    // Check authorization: Only admin or the company that owns the job can view applications
+    let isAuthorized = false;
+    
+    if (req.user.type === 'admin') {
+      isAuthorized = true;
+    } else if (req.user.type === 'company') {
+      // Check if the job's company belongs to this user
+      // job.company can be either an ObjectId or a populated Company document
+      if (job.company) {
+        const companyUserId = job.company.user?.toString() || job.company.user;
+        const companyId = job.company._id?.toString() || job.company.toString();
+        
+        // Check if company.user matches req.user.id, or if company._id matches req.user.id (fallback)
+        if (companyUserId === req.user.id || companyId === req.user.id) {
+          isAuthorized = true;
+        }
+      }
+    }
+
+    if (!isAuthorized) {
+      console.log('Authorization failed');
       return res.status(403).json({
         success: false,
         message: 'Not authorized to view applications for this job'
       });
     }
+
+    console.log('Authorization passed');
 
     const { page = 1, limit = 10, status } = req.query;
     
@@ -163,7 +293,7 @@ exports.getJobApplications = async (req, res) => {
     }
 
     const applications = await JobApplication.find(query)
-      .populate('applicant', 'collegeName email contactNo universityAffiliation')
+      .populate('applicant', 'collegeName email contactNo collegeCity tpoName tpoContactNo universityAffiliation courses numStudents highestCGPA avgCTC avgPlaced placementPercent grade linkedinProfile collegeWebsite')
       .populate('job', 'title')
       .sort({ appliedAt: -1 })
       .limit(limit * 1)
@@ -192,14 +322,42 @@ exports.getJobApplications = async (req, res) => {
 // Get applications by college
 exports.getCollegeApplications = async (req, res) => {
   try {
-    const collegeId = req.params.collegeId || req.user.id;
+    let collegeId = req.params.collegeId;
     
-    // Check if user is authorized
-    if (req.user.id !== collegeId && req.user.type !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to view these applications'
-      });
+    // If no collegeId provided, find college for current user
+    if (!collegeId) {
+      if (req.user.type !== 'college') {
+        return res.status(403).json({
+          success: false,
+          message: 'Only colleges can view their applications'
+        });
+      }
+      const college = await College.findOne({ user: req.user.id });
+      if (!college) {
+        return res.status(404).json({
+          success: false,
+          message: 'College profile not found'
+        });
+      }
+      collegeId = college._id;
+    }
+    
+    // Check if user is authorized (only admin can view other colleges' applications)
+    if (req.user.type !== 'admin') {
+      if (req.user.type === 'college') {
+        const college = await College.findOne({ user: req.user.id });
+        if (!college || college._id.toString() !== collegeId.toString()) {
+          return res.status(403).json({
+            success: false,
+            message: 'Not authorized to view these applications'
+          });
+        }
+      } else {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to view these applications'
+        });
+      }
     }
 
     const { page = 1, limit = 10, status } = req.query;
@@ -244,7 +402,13 @@ exports.updateApplicationStatus = async (req, res) => {
     const applicationId = req.params.applicationId;
 
     const application = await JobApplication.findById(applicationId)
-      .populate('job');
+      .populate({
+        path: 'job',
+        populate: {
+          path: 'company',
+          select: 'user companyName'
+        }
+      });
 
     if (!application) {
       return res.status(404).json({
@@ -254,7 +418,20 @@ exports.updateApplicationStatus = async (req, res) => {
     }
 
     // Check if user owns the job
-    if (application.job.company.toString() !== req.user.id) {
+    let isAuthorized = false;
+    
+    if (req.user.type === 'admin') {
+      isAuthorized = true;
+    } else if (req.user.type === 'company' && application.job?.company) {
+      const companyUserId = application.job.company.user?.toString() || application.job.company.user;
+      const companyId = application.job.company._id?.toString() || application.job.company.toString();
+      
+      if (companyUserId === req.user.id || companyId === req.user.id) {
+        isAuthorized = true;
+      }
+    }
+
+    if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this application'
@@ -334,24 +511,57 @@ exports.updateApplicationStatus = async (req, res) => {
 exports.getApplicationById = async (req, res) => {
   try {
     const applicationId = req.params.applicationId;
+    console.log('=== GET APPLICATION BY ID ===');
+    console.log('Application ID:', applicationId);
+    console.log('User:', req.user);
 
     const application = await JobApplication.findById(applicationId)
-      .populate('job', 'title company location salary jobType requirements')
-      .populate('job.company', 'companyName logo industry website')
-      .populate('applicant', 'collegeName email contactNo universityAffiliation');
+      .populate({
+        path: 'job',
+        select: 'title company location salary jobType requirements description requiredSkills',
+        populate: {
+          path: 'company',
+          select: 'companyName logo industry website user'
+        }
+      })
+      .populate('applicant', 'collegeName email contactNo collegeCity tpoName tpoContactNo universityAffiliation courses numStudents highestCGPA avgCTC avgPlaced placementPercent grade linkedinProfile collegeWebsite');
 
     if (!application) {
+      console.log('Application not found');
       return res.status(404).json({
         success: false,
         message: 'Application not found'
       });
     }
 
+    console.log('Application found:', {
+      jobCompany: application.job?.company?._id,
+      applicantId: application.applicant?._id,
+      userType: req.user.type,
+      userId: req.user.id
+    });
+
     // Check if user is authorized to view this application
-    const isAuthorized = 
-      application.applicant._id.toString() === req.user.id ||
-      application.job.company._id.toString() === req.user.id ||
-      req.user.type === 'admin';
+    let isAuthorized = req.user.type === 'admin';
+    
+    // Check if user owns the job (company)
+    if (req.user.type === 'company' && application.job?.company) {
+      // Company is populated, check if the company's user field matches
+      const companyUserId = application.job.company.user?.toString() || application.job.company._id.toString();
+      if (companyUserId === req.user.id || application.job.company._id.toString() === req.user.id) {
+        isAuthorized = true;
+      }
+    }
+    
+    // Check if user is the applicant (college)
+    if (req.user.type === 'college') {
+      const college = await College.findOne({ user: req.user.id });
+      if (college && application.applicant && application.applicant._id.toString() === college._id.toString()) {
+        isAuthorized = true;
+      }
+    }
+
+    console.log('Authorization check:', { isAuthorized });
 
     if (!isAuthorized) {
       return res.status(403).json({
@@ -365,6 +575,7 @@ exports.getApplicationById = async (req, res) => {
       data: application
     });
   } catch (error) {
+    console.error('Error in getApplicationById:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -389,7 +600,16 @@ exports.withdrawApplication = async (req, res) => {
     }
 
     // Check if user is the applicant
-    if (application.applicant.toString() !== req.user.id) {
+    // Find the college for this user
+    if (req.user.type !== 'college') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only colleges can withdraw applications'
+      });
+    }
+    
+    const college = await College.findOne({ user: req.user.id });
+    if (!college || application.applicant.toString() !== college._id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to withdraw this application'

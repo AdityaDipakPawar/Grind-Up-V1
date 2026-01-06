@@ -187,6 +187,106 @@ export const profileAPI = {
   },
 };
 
+// Job Applications API endpoints
+export const jobApplicationsAPI = {
+  // Apply for a job
+  applyForJob: async (jobId, applicationData) => {
+    const response = await api.post(`/job-applications/apply/${jobId}`, applicationData);
+    return response.data;
+  },
+
+  // Get applications for a job (company view)
+  getJobApplications: async (jobId, page = 1, limit = 10) => {
+    const response = await api.get(`/job-applications/job/${jobId}?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+
+  // Get applications for a college
+  getCollegeApplications: async (collegeId, page = 1, limit = 10) => {
+    const response = await api.get(`/job-applications/college/${collegeId}?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+
+  // Get current college's applications
+  getMyApplications: async () => {
+    const response = await api.get('/job-applications/college');
+    return response.data;
+  },
+
+  // Get application by ID
+  getApplicationById: async (applicationId) => {
+    const response = await api.get(`/job-applications/${applicationId}`);
+    return response.data;
+  },
+
+  // Update application status (company)
+  updateApplicationStatus: async (applicationId, status, feedback, notes) => {
+    const response = await api.put(`/job-applications/${applicationId}/status`, {
+      status,
+      feedback,
+      notes
+    });
+    return response.data;
+  },
+
+  // Withdraw application
+  withdrawApplication: async (applicationId) => {
+    const response = await api.put(`/job-applications/${applicationId}/withdraw`);
+    return response.data;
+  }
+};
+
+// Job Posts API endpoints
+export const jobPostsAPI = {
+  // Get all job posts
+  getAllJobPosts: async (params = {}) => {
+    const queryParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key]) {
+        queryParams.append(key, params[key]);
+      }
+    });
+    const response = await api.get(`/job-posts?${queryParams}`);
+    return response.data;
+  },
+
+  // Get job post by ID
+  getJobPostById: async (id) => {
+    const response = await api.get(`/job-posts/${id}`);
+    return response.data;
+  },
+
+  // Create job post
+  createJobPost: async (jobData) => {
+    const response = await api.post('/job-posts', jobData);
+    return response.data;
+  },
+
+  // Update job post
+  updateJobPost: async (id, jobData) => {
+    const response = await api.put(`/job-posts/${id}`, jobData);
+    return response.data;
+  },
+
+  // Delete job post
+  deleteJobPost: async (id) => {
+    const response = await api.delete(`/job-posts/${id}`);
+    return response.data;
+  },
+
+  // Get job posts by company
+  getJobPostsByCompany: async (companyId, params = {}) => {
+    const queryParams = new URLSearchParams();
+    Object.keys(params).forEach(key => {
+      if (params[key]) {
+        queryParams.append(key, params[key]);
+      }
+    });
+    const response = await api.get(`/job-posts/company/${companyId}?${queryParams}`);
+    return response.data;
+  }
+};
+
 export default api;
 
 // Admin API endpoints

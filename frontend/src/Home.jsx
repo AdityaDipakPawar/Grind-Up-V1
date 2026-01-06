@@ -76,27 +76,56 @@ const Home = () => {
   };
 
   const handleApplyForJob = async (jobId) => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    if (user?.type !== "college") {
+      alert("Only college accounts can apply to jobs.");
+      return;
+    }
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/job-applications/${jobId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-        body: JSON.stringify({
-          coverLetter: "Interested in this position",
-          resume: "resume_url_here"
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000/api"}/job-applications/apply/${jobId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          body: JSON.stringify({
+            // Cover letter and resume are optional for college applications
+            // Colleges apply on behalf of their students
+            coverLetter: "",
+            resume: "",
+          }),
+        }
+      );
+      
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error("Failed to parse response:", parseError);
+        alert("Server error: Invalid response format");
+        return;
+      }
+      
+      if (response.ok && data?.success) {
         alert("Application submitted successfully!");
         fetchAppliedJobs();
+        fetchJobs(); // Refresh jobs to update applied status
       } else {
-        alert(`Error: ${data.message}`);
+        const errorMessage = data?.message || data?.error || `Failed to apply. Status: ${response.status}`;
+        alert(errorMessage);
+        console.error("Application failed - Full response:", {
+          status: response.status,
+          statusText: response.statusText,
+          data: data
+        });
       }
-    } catch (error) {
-      console.error("Error applying for job:", error);
+    } catch (err) {
+      console.error("Error applying for job:", err);
       alert("Failed to apply for job. Please try again.");
     }
   };
@@ -239,26 +268,14 @@ const Home = () => {
             <div className="college-actions">
               <h2 className="welcome">Welcome, {user.collegeName}</h2>
               
-              {appliedJobs.length > 0 && (
-                <div className="applied-jobs">
-                  <h3>My Applied Jobs</h3>
-                  <div className="job-list">
-                    {appliedJobs.map(application => (
-                      <div key={application._id} className="job-card">
-                        <h4>{application.job.title}</h4>
-                        <p>Status: {application.status}</p>
-                        <p>Applied on: {new Date(application.appliedAt).toLocaleDateString()}</p>
-                        <button 
-                          onClick={() => navigate(`/job-applications/view/${application._id}`)}
-                          className="view-application-btn"
-                        >
-                          View Application
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div className="quick-links">
+                <button 
+                  onClick={() => navigate("/applied-jobs")}
+                  className="view-applied-jobs-btn"
+                >
+                  View All Applied Jobs ({appliedJobs.length})
+                </button>
+              </div>
             </div>
             </div>
           )}
@@ -287,38 +304,56 @@ const Home = () => {
                 {loading ? (
                   <p>Loading jobs...</p>
                 ) : jobs.length > 0 ? (
-                  <div className="jobs-grid">
-                    {jobs
-                      .filter(job => 
-                        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        job.description.toLowerCase().includes(searchTerm.toLowerCase())
-                      )
-                      .map(job => (
-                        <div key={job._id} className="job-card">
-                          <h4>{job.title}</h4>
-                          <p>{job.shortDescription || job.description.substring(0, 100)}...</p>
-                          <div className="job-meta">
-                            <span>Location: {job.location.city}, {job.location.state}</span>
-                            <span>Type: {job.jobType}</span>
-                            {job.salary && <span>Salary: {formatSalary(job.salary)}</span>}
+                  <>
+                    <div className="jobs-grid">
+                      {jobs
+                        .filter(job => 
+                          job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          job.description.toLowerCase().includes(searchTerm.toLowerCase())
+                        )
+                        .slice(0, 6)
+                        .map(job => (
+                          <div key={job._id} className="job-card">
+                            <h4>{job.title}</h4>
+                            <p>{job.shortDescription || job.description.substring(0, 100)}...</p>
+                            <div className="job-meta">
+                              <span>Location: {job.location.city}, {job.location.state}</span>
+                              <span>Type: {job.jobType}</span>
+                              {job.salary && <span>Salary: {formatSalary(job.salary)}</span>}
+                            </div>
+                            <div className="job-card-actions">
+                              <button 
+                                onClick={() => handleApplyForJob(job._id)}
+                                className={`apply-btn ${isJobApplied(job._id) ? 'applied' : ''}`}
+                                disabled={isJobApplied(job._id)}
+                              >
+                                {isJobApplied(job._id) ? 'Applied' : 'Apply Now'}
+                              </button>
+                              <button 
+                                onClick={() => navigate(`/jobs/${job._id}`)}
+                                className="view-details-btn"
+                              >
+                                View Details
+                              </button>
+                            </div>
                           </div>
-                          <button 
-                            onClick={() => handleApplyForJob(job._id)}
-                            className={`apply-btn ${isJobApplied(job._id) ? 'applied' : ''}`}
-                            disabled={isJobApplied(job._id)}
-                          >
-                            {isJobApplied(job._id) ? 'Applied' : 'Apply Now'}
-                          </button>
-                          <button 
-                            onClick={() => navigate(`/jobs/${job._id}`)}
-                            className="view-details-btn"
-                          >
-                            View Details
-                          </button>
-                        </div>
-                      ))
-                    }
-                  </div>
+                        ))
+                      }
+                    </div>
+                    {jobs.filter(job => 
+                      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      job.description.toLowerCase().includes(searchTerm.toLowerCase())
+                    ).length > 6 && (
+                      <div className="view-all-jobs-wrapper">
+                        <button 
+                          onClick={() => navigate("/jobs")}
+                          className="view-all-jobs-btn"
+                        >
+                          View All Jobs →
+                        </button>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <p>No jobs available at the moment.</p>
                 )}

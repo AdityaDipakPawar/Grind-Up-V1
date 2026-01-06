@@ -2,6 +2,43 @@
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.error-state h2 {
+  color: #d32f2f;
+  margin-bottom: 10px;
+}
+
+.error-state p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.retry-btn {
+  background-color: #667eea;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.retry-btn:hover {
+  background-color: #5568d3;
 }
 
 .application-header {

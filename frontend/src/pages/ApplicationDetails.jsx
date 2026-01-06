@@ -13,69 +13,137 @@ const ApplicationDetails = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!isAuthenticated || user?.type !== "college") {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    if (user?.type !== "college") {
+      console.error("User type check failed:", { userType: user?.type, user });
       navigate("/home");
       return;
     }
 
     const fetchApplicationDetails = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/job-applications/application/${applicationId}`, {
+        console.log("Fetching application:", applicationId);
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/job-applications/${applicationId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         });
-        const data = await response.json();
-        if (data.success) {
-          setApplication(data.data.application);
+        
+        console.log("Response status:", response.status);
+        
+        let data;
+        try {
+          data = await response.json();
+          console.log("Response data:", data);
+        } catch (parseError) {
+          console.error("Failed to parse response:", parseError);
+          setError("Invalid response from server");
+          setLoading(false);
+          return;
+        }
+        
+        if (response.ok && data.success) {
+          console.log("Application data:", data.data);
+          setApplication(data.data);
         } else {
-          setError(data.message || "Failed to fetch application details");
+          console.error("API error:", data);
+          setError(data.message || `Failed to fetch application details (Status: ${response.status})`);
         }
       } catch (error) {
         console.error("Error fetching application details:", error);
-        setError("An error occurred while fetching application details");
+        setError(error.message || "An error occurred while fetching application details");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchApplicationDetails();
+    if (applicationId) {
+      fetchApplicationDetails();
+    } else {
+      setError("Application ID is missing");
+      setLoading(false);
+    }
   }, [isAuthenticated, applicationId, navigate, user]);
 
   const getStatusClass = (status) => {
     switch (status) {
+      case "applied":
       case "pending":
         return "status-pending";
+      case "under-review":
       case "reviewing":
         return "status-reviewing";
       case "shortlisted":
+        return "status-shortlisted";
+      case "interview-scheduled":
+      case "interviewed":
         return "status-shortlisted";
       case "rejected":
         return "status-rejected";
       case "accepted":
         return "status-accepted";
+      case "withdrawn":
+        return "status-rejected";
       default:
-        return "";
+        return "status-pending";
     }
   };
 
   if (loading) {
-    return <div className="loading">Loading application details...</div>;
+    return (
+      <div className="application-details-container">
+        <div className="loading-state">
+          <p>Loading application details...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return (
+      <div className="application-details-container">
+        <button className="back-btn" onClick={() => navigate("/applied-jobs")}>
+          ← Back to Applied Jobs
+        </button>
+        <div className="error-state">
+          <h2>Error</h2>
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()} className="retry-btn">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!application) {
-    return <div className="error">Application not found</div>;
+    return (
+      <div className="application-details-container">
+        <button className="back-btn" onClick={() => navigate("/applied-jobs")}>
+          ← Back to Applied Jobs
+        </button>
+        <div className="error-state">
+          <h2>Application Not Found</h2>
+          <p>The application you're looking for doesn't exist or you don't have permission to view it.</p>
+          <button onClick={() => navigate("/applied-jobs")} className="retry-btn">
+            Go to Applied Jobs
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="application-details-container">
       <div className="application-header">
-        <button className="back-btn" onClick={() => navigate("/home")}>
-          Back to Home
+        <button className="back-btn" onClick={() => navigate("/applied-jobs")}>
+          ← Back to Applied Jobs
         </button>
         <h1>Application Details</h1>
         <div className={`application-status ${getStatusClass(application.status)}`}>
@@ -87,18 +155,40 @@ const ApplicationDetails = () => {
         <div className="job-details-section">
           <h2>Job Details</h2>
           <div className="detail-card">
-            <h3>{application.job.title}</h3>
-            <p className="company-name">{application.job.company.companyName}</p>
-            <div className="job-meta">
-              <span>Location: {application.job.location.city}, {application.job.location.state}</span>
-              <span>Job Type: {application.job.jobType}</span>
-              {application.job.salary && <span>Salary: {application.job.salary}</span>}
-            </div>
-            <div className="job-description">
-              <h4>Description</h4>
-              <p>{application.job.description}</p>
-            </div>
-            {application.job.requiredSkills && application.job.requiredSkills.length > 0 && (
+            <h3>{application.job?.title || "Job Title"}</h3>
+            <p className="company-name">
+              {application.job?.company?.companyName || 
+               application.job?.company || 
+               "Company"}
+            </p>
+            {application.job?.location && (
+              <div className="job-meta">
+                <span>
+                  Location: {application.job.location.city || ""}, {application.job.location.state || ""}
+                </span>
+              </div>
+            )}
+            {application.job?.jobType && (
+              <div className="job-meta">
+                <span>Job Type: {application.job.jobType}</span>
+              </div>
+            )}
+            {application.job?.salary && (
+              <div className="job-meta">
+                <span>
+                  Salary: ₹{application.job.salary.min?.toLocaleString() || ""}
+                  {application.job.salary.max ? ` - ₹${application.job.salary.max.toLocaleString()}` : ""}
+                  {application.job.salary.period ? ` ${application.job.salary.period.replace("-", " ")}` : ""}
+                </span>
+              </div>
+            )}
+            {application.job?.description && (
+              <div className="job-description">
+                <h4>Description</h4>
+                <p>{application.job.description}</p>
+              </div>
+            )}
+            {application.job?.requiredSkills && application.job.requiredSkills.length > 0 && (
               <div className="skills-section">
                 <h4>Required Skills</h4>
                 <div className="skills-list">
@@ -111,20 +201,25 @@ const ApplicationDetails = () => {
           </div>
         </div>
 
-        <ApplicationTimeline application={application} />
+        {application && <ApplicationTimeline application={application} />}
 
         <div className="application-details-section">
           <h2>Your Application</h2>
           <div className="detail-card">
             <div className="application-meta">
-              <p>Applied on: {new Date(application.appliedAt).toLocaleDateString()}</p>
-              <p>Last updated: {new Date(application.updatedAt).toLocaleDateString()}</p>
+              <p>Applied on: {application.appliedAt ? new Date(application.appliedAt).toLocaleDateString() : "N/A"}</p>
+              {application.updatedAt && (
+                <p>Last updated: {new Date(application.updatedAt).toLocaleDateString()}</p>
+              )}
             </div>
             
-            <div className="cover-letter-section">
-              <h4>Cover Letter</h4>
-              <p>{application.coverLetter || "No cover letter provided"}</p>
-            </div>
+            {/* Cover letter and resume are optional for college applications */}
+            {application.coverLetter && (
+              <div className="cover-letter-section">
+                <h4>Cover Letter</h4>
+                <p>{application.coverLetter}</p>
+              </div>
+            )}
             
             {application.resume && (
               <div className="resume-section">
@@ -132,6 +227,14 @@ const ApplicationDetails = () => {
                 <a href={application.resume} target="_blank" rel="noopener noreferrer" className="resume-link">
                   View Resume
                 </a>
+              </div>
+            )}
+
+            {!application.coverLetter && !application.resume && (
+              <div className="application-note">
+                <p style={{ color: '#666', fontStyle: 'italic' }}>
+                  Note: This is a college application. The college has expressed interest on behalf of their students.
+                </p>
               </div>
             )}
           </div>

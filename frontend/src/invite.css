@@ -352,4 +352,128 @@ footer {
         font-size: 14px;
         padding: 6px 10px;
     }
+}
+
+/* Company View Styles */
+.job-selector {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.job-selector label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.job-selector select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.colleges-grid {
+    margin: 30px 0;
+}
+
+.colleges-grid h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.college-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: box-shadow 0.3s;
+}
+
+.college-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.college-info h4 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.college-info p {
+    margin: 5px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.send-invite-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.send-invite-btn:hover:not(:disabled) {
+    background-color: #45a049;
+}
+
+.send-invite-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.sent-invites-section {
+    margin: 40px 0;
+}
+
+.sent-invites-section h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.invites-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.invite-item {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.invite-item p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.status-pending {
+    color: #ff9800;
+    font-weight: 600;
+}
+
+.status-accepted {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
+.status-declined {
+    color: #f44336;
+    font-weight: 600;
 } 

@@ -124,75 +124,67 @@ const JobApplications = () => {
       ) : (
         <div className="applications-list">
           {applications.map((application) => (
-            <div key={application._id} className="application-card">
-              <div className="applicant-info">
-                <h3>{application.applicant.collegeName}</h3>
-                <p>Applied on: {new Date(application.appliedAt).toLocaleDateString()}</p>
-                <div className="status-badge" data-status={application.status}>
-                  {application.status}
-                </div>
-              </div>
-              
-              <div className="application-details">
-                <div className="detail-group">
-                  <h4>Contact Information</h4>
-                  <p>Email: {application.applicant.email}</p>
-                  <p>Phone: {application.applicant.contactNumber || "Not provided"}</p>
-                </div>
-                
-                <div className="detail-group">
-                  <h4>Cover Letter</h4>
-                  <p>{application.coverLetter || "No cover letter provided"}</p>
-                </div>
-                
-                {application.resume && (
-                  <div className="detail-group">
-                    <h4>Resume</h4>
-                    <a href={application.resume} target="_blank" rel="noopener noreferrer" className="resume-link">
-                      View Resume
-                    </a>
+            <div key={application._id} className="application-card-compact">
+              <div className="applicant-info-compact">
+                <div className="college-name-section">
+                  <h3>{application.applicant.collegeName}</h3>
+                  <div className="status-badge" data-status={application.status}>
+                    {application.status}
                   </div>
-                )}
+                </div>
+                <div className="application-meta">
+                  <p><strong>Applied on:</strong> {new Date(application.appliedAt).toLocaleDateString()}</p>
+                  {application.applicant.email && (
+                    <p><strong>Email:</strong> {application.applicant.email}</p>
+                  )}
+                  {application.applicant.contactNo && (
+                    <p><strong>Contact:</strong> {application.applicant.contactNo}</p>
+                  )}
+                  {application.applicant.collegeCity && (
+                    <p><strong>City:</strong> {application.applicant.collegeCity}</p>
+                  )}
+                </div>
               </div>
               
-              <div className="application-actions">
-                <h4>Update Status</h4>
-                <div className="status-buttons">
-                  <button
-                    className={`status-btn ${application.status === "pending" ? "active" : ""}`}
-                    onClick={() => handleStatusChange(application._id, "pending")}
-                    disabled={application.status === "pending"}
-                  >
-                    Pending
-                  </button>
-                  <button
-                    className={`status-btn ${application.status === "reviewing" ? "active" : ""}`}
-                    onClick={() => handleStatusChange(application._id, "reviewing")}
-                    disabled={application.status === "reviewing"}
-                  >
-                    Reviewing
-                  </button>
-                  <button
-                    className={`status-btn ${application.status === "shortlisted" ? "active" : ""}`}
-                    onClick={() => handleStatusChange(application._id, "shortlisted")}
-                    disabled={application.status === "shortlisted"}
-                  >
-                    Shortlisted
-                  </button>
-                  <button
-                    className={`status-btn ${application.status === "rejected" ? "active" : ""}`}
-                    onClick={() => handleStatusChange(application._id, "rejected")}
-                    disabled={application.status === "rejected"}
-                  >
-                    Rejected
-                  </button>
-                  <button
-                    className={`status-btn ${application.status === "accepted" ? "active" : ""}`}
-                    onClick={() => handleStatusChange(application._id, "accepted")}
-                    disabled={application.status === "accepted"}
-                  >
-                    Accepted
-                  </button>
+              <div className="application-actions-compact">
+                <button
+                  className="view-details-btn"
+                  onClick={() => navigate(`/college-details/${application.applicant._id}?applicationId=${application._id}`)}
+                >
+                  View All Details
+                </button>
+                <div className="status-update-section">
+                  <h4>Update Status</h4>
+                  <div className="status-buttons-compact">
+                    <button
+                      className={`status-btn ${application.status === "under-review" || application.status === "applied" ? "active" : ""}`}
+                      onClick={() => handleStatusChange(application._id, "under-review")}
+                      disabled={application.status === "under-review" || application.status === "applied"}
+                    >
+                      Review
+                    </button>
+                    <button
+                      className={`status-btn ${application.status === "shortlisted" ? "active" : ""}`}
+                      onClick={() => handleStatusChange(application._id, "shortlisted")}
+                      disabled={application.status === "shortlisted"}
+                    >
+                      Shortlist
+                    </button>
+                    <button
+                      className={`status-btn ${application.status === "accepted" ? "active" : ""}`}
+                      onClick={() => handleStatusChange(application._id, "accepted")}
+                      disabled={application.status === "accepted"}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      className={`status-btn ${application.status === "rejected" ? "active" : ""}`}
+                      onClick={() => handleStatusChange(application._id, "rejected")}
+                      disabled={application.status === "rejected"}
+                    >
+                      Reject
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
