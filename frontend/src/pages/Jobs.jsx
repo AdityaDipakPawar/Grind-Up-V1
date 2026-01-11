@@ -164,8 +164,8 @@ const Jobs = () => {
   return (
     <div className="jobs-page">
       <main className="main-content main-auth">
-        <div className="container">
-          <h1 className="page-title">Find Your Next Opportunity</h1>
+        <div className="container jobs-page-container">
+          
 
           <div className="jobs-layout">
             <aside className="filters-sidebar">
@@ -184,6 +184,7 @@ const Jobs = () => {
               ) : jobs.length > 0 ? (
                 <>
                   <div className="results-header">
+                  <h1 className="page-title">Find Your Next Opportunity</h1>
                     <p>{jobs.length} job(s) found</p>
                   </div>
                   <div className="jobs-grid">

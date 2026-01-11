@@ -41,7 +41,7 @@
 }
 
 .retry-btn {
-  background-color: #667eea;
+  background-color: #ff914d;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -52,7 +52,7 @@
 }
 
 .retry-btn:hover {
-  background-color: #5568d3;
+  background-color: #fff8f4;
 }
 
 /* Empty State */
@@ -88,7 +88,7 @@
 
 .browse-jobs-btn {
   margin-top: 25px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ff914d;
   color: white;
   border: none;
   padding: 12px 30px;
@@ -245,13 +245,13 @@
 }
 
 .view-application-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ff914d;
   color: white;
 }
 
 .view-application-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 8px rgba(255, 145, 77, 0.3);
 }
 
 /* Responsive Design */
@@ -292,4 +292,6 @@
     width: 100%;
   }
 }
+
+
 

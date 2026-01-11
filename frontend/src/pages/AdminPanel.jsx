@@ -204,7 +204,7 @@ const AdminPanel = () => {
             onClick={() => navigate('/admin/analytics')}
             style={{
               padding: '10px 20px',
-              backgroundColor: '#667eea',
+              backgroundColor: '#ff914d',
               color: 'white',
               border: 'none',
               borderRadius: '6px',

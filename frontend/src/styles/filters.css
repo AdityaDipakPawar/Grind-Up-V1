@@ -24,8 +24,8 @@
 
 .clear-filters-btn {
   background: transparent;
-  color: #667eea;
-  border: 1px solid #667eea;
+  color: #ff914d;
+  border: 1px solid #ff914d;
   padding: 8px 16px;
   border-radius: 5px;
   cursor: pointer;
@@ -34,7 +34,7 @@
 }
 
 .clear-filters-btn:hover {
-  background: #667eea;
+  background: #ff914d;
   color: white;
 }
 
@@ -64,7 +64,7 @@
 .filter-group input:focus,
 .filter-group select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #ff914d;
 }
 
 .filter-group input::placeholder {

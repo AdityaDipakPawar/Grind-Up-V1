@@ -285,7 +285,7 @@ export default function JobDetails() {
                     <p>
                       {formatDate(job.applicationDeadline)}
                       {typeof daysLeft === "number" && (
-                        <span style={{ display: "block", marginTop: "5px", fontWeight: "600", color: daysLeft < 0 ? "#d32f2f" : daysLeft <= 7 ? "#f57c00" : "#1976d2" }}>
+                        <span style={{ display: "block", marginTop: "5px", fontWeight: "600", color: daysLeft < 0 ? "#d32f2f" : daysLeft <= 7 ? "#fff8f4" : "#1976d2" }}>
                           {daysLeft < 0
                             ? "Deadline passed"
                             : daysLeft === 0
@@ -465,7 +465,7 @@ export default function JobDetails() {
                 <div className="company-detail-item">
                   <strong>Email:</strong>
                   <span>
-                    <a href={`mailto:${job.company.email}`} style={{ color: "#667eea" }}>
+                    <a href={`mailto:${job.company.email}`} style={{ color: "#ff914d" }}>
                       {job.company.email}
                     </a>
                   </span>

@@ -13,10 +13,10 @@ exports.listPending = async (req, res) => {
 
     const [items, total] = await Promise.all([
       Model.find({ approvalStatus: 'pending' })
+        .select('-password')
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(Number(limit))
-        .select('collegeName companyName email contactNo approvalStatus createdAt'),
+        .limit(Number(limit)),
       Model.countDocuments({ approvalStatus: 'pending' }),
     ]);
 
@@ -37,10 +37,10 @@ exports.listApproved = async (req, res) => {
 
     const [items, total] = await Promise.all([
       Model.find({ approvalStatus: 'approved' })
+        .select('-password')
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(Number(limit))
-        .select('collegeName companyName email contactNo approvalStatus createdAt'),
+        .limit(Number(limit)),
       Model.countDocuments({ approvalStatus: 'approved' }),
     ]);
 

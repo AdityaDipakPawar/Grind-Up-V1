@@ -32,7 +32,7 @@
 
 /* Application Status Section */
 .application-status-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ff914d;
   color: white;
   padding: 20px;
   border-radius: 8px;
@@ -75,7 +75,7 @@
 
 .status-btn.active {
   background-color: white;
-  color: #667eea;
+  color: #ff914d;
 }
 
 .status-btn:disabled {
@@ -97,7 +97,7 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ff914d;
   color: white;
   display: flex;
   align-items: center;
@@ -152,7 +152,7 @@
   background-color: #f8f9fa;
   padding: 20px;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #ff914d;
 }
 
 .section-title {
@@ -187,7 +187,7 @@
 }
 
 .detail-item a {
-  color: #667eea;
+  color: #ff914d;
   text-decoration: none;
   font-weight: 500;
 }
@@ -218,13 +218,13 @@
   padding: 15px;
   background-color: #f8f9fa;
   border-radius: 6px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #ff914d;
   color: #333;
   line-height: 1.6;
 }
 
 .external-link {
-  color: #667eea;
+  color: #ff914d;
   text-decoration: none;
   font-weight: 500;
   display: inline-flex;
@@ -238,7 +238,7 @@
 
 .download-link {
   display: inline-block;
-  background-color: #667eea;
+  background-color: #ff914d;
   color: white;
   padding: 12px 20px;
   border-radius: 6px;

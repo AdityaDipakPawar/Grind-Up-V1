@@ -43,7 +43,7 @@ const OrgDetailModal = ({ organization, type, onClose }) => {
             <h3>📋 Basic Information</h3>
             <FieldRow label="Email" value={organization.email} />
             <FieldRow label="Contact No" value={organization.contactNo} />
-            <FieldRow label="Location" value={organization.location} />
+            {!isCollege && <FieldRow label="Location" value={organization.location} />}
             <FieldRow label="Status" value={organization.approvalStatus?.charAt(0).toUpperCase() + organization.approvalStatus?.slice(1)} />
           </div>
 
@@ -87,9 +87,7 @@ const OrgDetailModal = ({ organization, type, onClose }) => {
                 <h3>🏢 Company Information</h3>
                 <FieldRow label="Industry" value={organization.industry} />
                 <FieldRow label="Company Size" value={organization.companySize} />
-                <FieldRow label="Contact Person Name" value={organization.contactPersonName} />
-                <FieldRow label="HR Email" value={organization.hrEmail} />
-                <FieldRow label="Registration No" value={organization.companyRegistration} />
+                <FieldRow label="Location" value={organization.location} />
               </div>
             </>
           )}

@@ -39,8 +39,8 @@
   gap: 8px;
   padding: 10px 20px;
   background: white;
-  border: 2px solid #667eea;
-  color: #667eea;
+  border: 2px solid #ff914d;
+  color: #ff914d;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
@@ -50,7 +50,7 @@
 }
 
 .back-button:hover {
-  background: #667eea;
+  background: #ff914d;
   color: white;
 }
 
@@ -85,7 +85,7 @@
 }
 
 .company-link {
-  color: #764ba2;
+  color: #fff8f4;
   font-size: 1.3em;
   font-weight: 600;
   text-decoration: none;
@@ -93,12 +93,12 @@
 }
 
 .company-link:hover {
-  color: #667eea;
+  color: #ff914d;
   text-decoration: underline;
 }
 
 .job-badge {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ff914d;
   color: white;
   padding: 6px 14px;
   border-radius: 20px;
@@ -194,7 +194,7 @@
   content: "✓";
   position: absolute;
   left: 0;
-  color: #667eea;
+  color: #ff914d;
   font-weight: bold;
   font-size: 1.2em;
 }
@@ -219,9 +219,9 @@
 }
 
 .skill-tag:hover {
-  background: #667eea;
+  background: #ff914d;
   color: white;
-  border-color: #667eea;
+  border-color: #ff914d;
 }
 
 .skill-tag.required {
@@ -238,7 +238,7 @@
 
 /* Apply Section */
 .apply-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ff914d;
   border-radius: 12px;
   padding: 40px;
   text-align: center;
@@ -263,7 +263,7 @@
 .apply-btn-primary {
   padding: 15px 40px;
   background: white;
-  color: #667eea;
+  color: #ff914d;
   border: none;
   border-radius: 8px;
   font-size: 1.1em;
@@ -326,7 +326,7 @@
 .company-logo-placeholder {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ff914d;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -399,7 +399,7 @@
 }
 
 .company-link-btn:hover {
-  background: #667eea;
+  background: #ff914d;
   color: white;
 }
 
@@ -433,7 +433,7 @@
 .similar-job-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  border-color: #667eea;
+  border-color: #ff914d;
 }
 
 .similar-job-card h3 {
@@ -443,7 +443,7 @@
 }
 
 .similar-job-card .company-name {
-  color: #764ba2;
+  color: #fff8f4;
   font-weight: 600;
   margin-bottom: 10px;
   display: block;

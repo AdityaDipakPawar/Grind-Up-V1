@@ -208,18 +208,18 @@
   padding: 12px;
   background-color: #f8f9fa;
   border-radius: 4px;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid #ff914d;
 }
 
 .link {
-  color: #667eea;
+  color: #ff914d;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s;
 }
 
 .link:hover {
-  color: #764ba2;
+  color: #fff8f4;
   text-decoration: underline;
 }
 
@@ -344,7 +344,7 @@
 }
 
 .view-details-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ff914d;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -358,7 +358,7 @@
 
 .view-details-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 8px rgba(255, 145, 77, 0.3);
 }
 
 .status-update-section {
@@ -396,8 +396,8 @@
 }
 
 .status-buttons-compact .status-btn.active {
-  border-color: #667eea;
-  background-color: #667eea;
+  border-color: #ff914d;
+  background-color: #ff914d;
   color: white;
   font-weight: 500;
 }

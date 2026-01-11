@@ -127,47 +127,47 @@ const JobApplications = () => {
             <div key={application._id} className="application-card-compact">
               <div className="applicant-info-compact">
                 <div className="college-name-section">
-                  <h3>{application.applicant.collegeName}</h3>
-                  <div className="status-badge" data-status={application.status}>
-                    {application.status}
+                <h3>{application.applicant.collegeName}</h3>
+                <div className="status-badge" data-status={application.status}>
+                  {application.status}
                   </div>
                 </div>
                 <div className="application-meta">
                   <p><strong>Applied on:</strong> {new Date(application.appliedAt).toLocaleDateString()}</p>
                   {application.applicant.email && (
                     <p><strong>Email:</strong> {application.applicant.email}</p>
-                  )}
+                      )}
                   {application.applicant.contactNo && (
                     <p><strong>Contact:</strong> {application.applicant.contactNo}</p>
-                  )}
+                      )}
                   {application.applicant.collegeCity && (
                     <p><strong>City:</strong> {application.applicant.collegeCity}</p>
-                  )}
+                      )}
                 </div>
               </div>
               
               <div className="application-actions-compact">
-                <button
+                  <button
                   className="view-details-btn"
                   onClick={() => navigate(`/college-details/${application.applicant._id}?applicationId=${application._id}`)}
-                >
+                  >
                   View All Details
-                </button>
+                  </button>
                 <div className="status-update-section">
                   <h4>Update Status</h4>
                   <div className="status-buttons-compact">
-                    <button
+                  <button
                       className={`status-btn ${application.status === "under-review" || application.status === "applied" ? "active" : ""}`}
                       onClick={() => handleStatusChange(application._id, "under-review")}
                       disabled={application.status === "under-review" || application.status === "applied"}
-                    >
+                  >
                       Review
-                    </button>
-                    <button
-                      className={`status-btn ${application.status === "shortlisted" ? "active" : ""}`}
-                      onClick={() => handleStatusChange(application._id, "shortlisted")}
-                      disabled={application.status === "shortlisted"}
-                    >
+                  </button>
+                  <button
+                    className={`status-btn ${application.status === "shortlisted" ? "active" : ""}`}
+                    onClick={() => handleStatusChange(application._id, "shortlisted")}
+                    disabled={application.status === "shortlisted"}
+                  >
                       Shortlist
                     </button>
                     <button
@@ -176,14 +176,14 @@ const JobApplications = () => {
                       disabled={application.status === "accepted"}
                     >
                       Accept
-                    </button>
-                    <button
-                      className={`status-btn ${application.status === "rejected" ? "active" : ""}`}
-                      onClick={() => handleStatusChange(application._id, "rejected")}
-                      disabled={application.status === "rejected"}
-                    >
+                  </button>
+                  <button
+                    className={`status-btn ${application.status === "rejected" ? "active" : ""}`}
+                    onClick={() => handleStatusChange(application._id, "rejected")}
+                    disabled={application.status === "rejected"}
+                  >
                       Reject
-                    </button>
+                  </button>
                   </div>
                 </div>
               </div>
