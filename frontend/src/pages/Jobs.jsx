@@ -117,7 +117,10 @@ const Jobs = () => {
       
       if (response.ok && data?.success) {
         alert("Application submitted successfully!");
-        fetchAppliedJobs();
+        // Refresh applied jobs list
+        await fetchAppliedJobs();
+        // Refresh the page to update UI
+        window.location.reload();
       } else {
         // Show the actual error message from the backend
         const errorMessage = data?.message || data?.error || `Failed to apply. Status: ${response.status}`;

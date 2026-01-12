@@ -99,6 +99,18 @@ export const authAPI = {
     const response = await api.post('/auth/refresh');
     return response.data;
   },
+
+  // Resend OTP
+  resendOTP: async (email) => {
+    const response = await api.post('/auth/resend-otp', { email });
+    return response.data;
+  },
+
+  // Verify OTP
+  verifyOTP: async (email, otp) => {
+    const response = await api.post('/auth/verify-otp', { email, otp });
+    return response.data;
+  },
 };
 
 // Placements API endpoints

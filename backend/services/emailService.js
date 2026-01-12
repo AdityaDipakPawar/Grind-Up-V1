@@ -519,6 +519,82 @@ const sendWeeklyDigest = async (email, collegeName, newJobs) => {
   }
 };
 
+/**
+ * Send OTP email for email verification
+ */
+const sendOTPEmail = async (email, otp, userName, userType) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: email,
+      subject: 'Verify Your Email - Grind Up',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #ff914d 0%, #ff7a3d 100%); color: white; padding: 20px; border-radius: 5px; text-align: center; }
+            .content { padding: 20px 0; }
+            .otp-box { background-color: #f5f5f5; border: 2px dashed #ff914d; padding: 20px; text-align: center; margin: 20px 0; border-radius: 5px; }
+            .otp-code { font-size: 32px; font-weight: bold; color: #ff914d; letter-spacing: 8px; font-family: 'Courier New', monospace; }
+            .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+            .warning { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Verify Your Email 📧</h1>
+            </div>
+            <div class="content">
+              <p>Hello <strong>${userName}</strong>,</p>
+              <p>Thank you for registering with Grind Up! Please verify your email address to complete your ${userType} registration.</p>
+              
+              <div class="otp-box">
+                <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">Your verification code is:</p>
+                <div class="otp-code">${otp}</div>
+              </div>
+              
+              <div class="warning">
+                <p style="margin: 0;"><strong>⚠️ Important:</strong> This code will expire in 7 minutes. Do not share this code with anyone.</p>
+              </div>
+              
+              <p>Enter this code on the verification page to activate your account.</p>
+              
+              <hr>
+              <p style="font-size: 12px; color: #666;">If you didn't create an account with Grind Up, please ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>&copy; 2024 Grind Up. All rights reserved.</p>
+              <p>Verified Two-Sided Placement Platform</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ OTP email sent to ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error sending OTP email to ${email}:`, error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response
+    });
+    // Check if it's an authentication error
+    if (error.code === 'EAUTH' || error.code === 'EENVELOPE') {
+      console.error('SMTP Authentication failed. Please check SMTP_USER and SMTP_PASSWORD in .env');
+    }
+    return false;
+  }
+};
+
 module.exports = {
   sendCollegeRegistrationEmail,
   sendCompanyRegistrationEmail,
@@ -528,4 +604,5 @@ module.exports = {
   sendJobApplicationConfirmation,
   sendRejectionEmail,
   sendWeeklyDigest,
+  sendOTPEmail,
 };

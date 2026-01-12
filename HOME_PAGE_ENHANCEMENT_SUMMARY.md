@@ -5,7 +5,7 @@
 ### 1. **Welcome Banner for Non-Authenticated Users**
 Created a comprehensive landing experience that includes:
 - **Hero Section**: Eye-catching gradient banner with clear value proposition
-- **Platform Purpose**: "Eliminate Fake Internships. Build Trust. Hire Transparently."
+- **Platform Purpose**: "Eliminate Fake Internships. Hire Transparently."
 - **Key Features Grid**: 4 feature cards highlighting:
   - ✓ Verified Platform
   - 🎯 Direct Connection

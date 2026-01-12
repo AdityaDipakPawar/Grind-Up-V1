@@ -81,11 +81,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.registerCollege(collegeData);
       
       if (response.success) {
-        const { token, user: userData } = response.data;
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-        setIsAuthenticated(true);
+        // Registration successful but email not verified yet
+        // Return success so user can be redirected to OTP page
         return { success: true, message: response.message };
       } else {
         return { success: false, message: response.message };
@@ -105,11 +102,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.registerCompany(companyData);
       
       if (response.success) {
-        const { token, user: userData } = response.data;
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-        setIsAuthenticated(true);
+        // Registration successful but email not verified yet
+        // Return success so user can be redirected to OTP page
         return { success: true, message: response.message };
       } else {
         return { success: false, message: response.message };
@@ -169,6 +163,9 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    if (userData) {
+      setIsAuthenticated(true);
+    }
   };
 
   // Check profile completion status

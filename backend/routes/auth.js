@@ -18,6 +18,10 @@ router.post('/register/admin', authController.registerAdmin);
 router.post('/login', validateLogin, authController.login);
 router.post('/logout', auth, authController.logout);
 
+// OTP routes
+router.post('/resend-otp', authController.resendOTP);
+router.post('/verify-otp', authController.verifyOTP);
+
 // User info route
 router.get('/me', auth, authController.getMe);
 router.get('/check-profile-completion', auth, authController.checkProfileCompletion);

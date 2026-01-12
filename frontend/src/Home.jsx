@@ -155,7 +155,7 @@ const Home = () => {
                 <h1>Welcome to Grind Up</h1>
                 <p className="tagline">Your Trusted Bridge Between Colleges and Companies</p>
                 <div className="value-proposition">
-                  <h2>Eliminate Fake Internships & Jobs. Build Trust.<br></br> Hire Transparently.</h2>
+                  <h2>Eliminate Fake Internships & Jobs.<br></br> Hire Transparently.</h2>
                   <p>
                     Grind Up is a verified two-sided placement platform that connects colleges and companies directly,
                     ensuring transparent, scam-free, and efficient hiring processes.

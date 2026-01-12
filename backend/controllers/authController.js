@@ -5,6 +5,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const emailService = require('../services/emailService');
 
+// Helper function to generate 6-digit OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
 // College Registration
 exports.registerCollege = async (req, res) => {
   try {
@@ -22,13 +27,20 @@ exports.registerCollege = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     
+    // Generate OTP
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 7 * 60 * 1000); // 7 minutes from now
+    
     // Create user
     const user = new User({ 
       email, 
       password: hashedPassword, 
       type: 'college',
       collegeName,
-      contactNo
+      contactNo,
+      isEmailVerified: false,
+      otp,
+      otpExpiry
     });
     
     await user.save();
@@ -39,29 +51,21 @@ exports.registerCollege = async (req, res) => {
       contactNo
     }).save();
 
-    // Send registration confirmation email
-    await emailService.sendCollegeRegistrationEmail(email, collegeName);
-    
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user._id, email: user.email, type: user.type }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: '1d' }
-    );
+    // Send OTP email
+    const emailSent = await emailService.sendOTPEmail(email, otp, collegeName, 'college');
+    if (!emailSent) {
+      console.error(`Failed to send OTP email to ${email}`);
+      // Still return success but log the error - email might fail but user is registered
+      // In production, you might want to queue the email or handle this differently
+    }
     
     res.status(201).json({
       success: true,
-      message: 'College registration successful',
+      message: 'Registration successful! Please check your email for the verification code.',
       data: {
-        token,
-        user: {
-          id: user._id,
-          email: user.email,
-          type: user.type,
-          collegeName: user.collegeName,
-          profileComplete: false,
-          approvalStatus: 'pending'
-        }
+        userId: user._id,
+        email: user.email,
+        userType: user.type
       }
     });
   } catch (err) {
@@ -137,6 +141,10 @@ exports.registerCompany = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     
+    // Generate OTP
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 7 * 60 * 1000); // 7 minutes from now
+    
     // Create user
     const user = new User({ 
       email, 
@@ -146,7 +154,10 @@ exports.registerCompany = async (req, res) => {
       contactNo,
       industry,
       companySize,
-      location
+      location,
+      isEmailVerified: false,
+      otp,
+      otpExpiry
     });
     
     await user.save();
@@ -160,29 +171,21 @@ exports.registerCompany = async (req, res) => {
       location
     }).save();
 
-    // Send registration confirmation email
-    await emailService.sendCompanyRegistrationEmail(email, companyName);
-    
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user._id, email: user.email, type: user.type }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: '1d' }
-    );
+    // Send OTP email
+    const emailSent = await emailService.sendOTPEmail(email, otp, companyName, 'company');
+    if (!emailSent) {
+      console.error(`Failed to send OTP email to ${email}`);
+      // Still return success but log the error - email might fail but user is registered
+      // In production, you might want to queue the email or handle this differently
+    }
     
     res.status(201).json({
       success: true,
-      message: 'Company registration successful',
+      message: 'Registration successful! Please check your email for the verification code.',
       data: {
-        token,
-        user: {
-          id: user._id,
-          email: user.email,
-          type: user.type,
-          companyName: user.companyName,
-          profileComplete: false,
-          approvalStatus: 'pending'
-        }
+        userId: user._id,
+        email: user.email,
+        userType: user.type
       }
     });
   } catch (err) {
@@ -214,6 +217,14 @@ exports.login = async (req, res) => {
       return res.status(400).json({ 
         success: false, 
         message: 'Invalid credentials' 
+      });
+    }
+    
+    // Check if email is verified (for college and company users, admin is always verified)
+    if (user.type !== 'admin' && !user.isEmailVerified) {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Please verify your email before logging in. Check your inbox for the verification code.' 
       });
     }
     
@@ -377,6 +388,166 @@ const getMissingFields = (profile, userType) => {
   }
   
   return missing;
+};
+
+// Resend OTP
+exports.resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+    
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Check if already verified
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is already verified'
+      });
+    }
+    
+    // Generate new OTP
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 7 * 60 * 1000); // 7 minutes from now
+    
+    // Update user with new OTP
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
+    
+    // Send OTP email
+    const userName = user.collegeName || user.companyName || email;
+    const userType = user.type;
+    const emailSent = await emailService.sendOTPEmail(email, otp, userName, userType);
+    
+    if (!emailSent) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP email. Please check your email configuration or try again later.'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'OTP has been resent to your email'
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: err.message
+    });
+  }
+};
+
+// Verify OTP
+exports.verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and OTP are required'
+      });
+    }
+    
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Check if already verified
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is already verified'
+      });
+    }
+    
+    // Check if OTP exists
+    if (!user.otp || !user.otpExpiry) {
+      return res.status(400).json({
+        success: false,
+        message: 'No OTP found. Please request a new OTP'
+      });
+    }
+    
+    // Check if OTP has expired
+    if (new Date() > user.otpExpiry) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP has expired. Please request a new OTP'
+      });
+    }
+    
+    // Verify OTP
+    if (user.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP. Please try again'
+      });
+    }
+    
+    // Mark email as verified and clear OTP
+    user.isEmailVerified = true;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    await user.save();
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, email: user.email, type: user.type },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+    
+    // Check profile completion
+    const ProfileModel = user.type === 'college' ? College : Company;
+    const profile = await ProfileModel.findOne({ user: user._id });
+    const profileComplete = isProfileComplete(profile, user.type);
+    const approvalStatus = profile?.approvalStatus || 'pending';
+    
+    res.json({
+      success: true,
+      message: 'Email verified successfully',
+      data: {
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+          type: user.type,
+          collegeName: user.collegeName,
+          companyName: user.companyName,
+          profileComplete,
+          approvalStatus
+        }
+      }
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: err.message
+    });
+  }
 };
 
 // Logout

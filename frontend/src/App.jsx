@@ -25,6 +25,7 @@ import Jobs from "./pages/Jobs";
 import AdminAnalyticsPage from "./pages/AdminAnalyticsPage";
 import CollegeDetails from "./pages/CollegeDetails";
 import AppliedJobs from "./pages/AppliedJobs";
+import OTPVerification from "./pages/OTPVerification";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           <Route path="/college-signup" element={<CollegeSignup />} />
           <Route path="/company-signup" element={<CompanySignup />} />
           <Route path="/admin-signup" element={<AdminSignup />} />
+          <Route path="/verify-otp" element={<OTPVerification />} />
           <Route
             path="/admin"
             element={

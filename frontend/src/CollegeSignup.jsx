@@ -55,8 +55,13 @@ const CollegeSignup = () => {
     try {
       const result = await registerCollege(formData);
       if (result.success) {
-        setMessage(result.message);
-        navigate('/profile', { state: { from: '/home', message: 'Please complete your profile to access full features' } });
+        // Redirect to OTP verification page
+        navigate('/verify-otp', {
+          state: {
+            email: formData.email,
+            userType: 'college'
+          }
+        });
       } else {
         setMessage(result.message);
       }

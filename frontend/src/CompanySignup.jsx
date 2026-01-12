@@ -64,9 +64,13 @@ const CompanySignup = () => {
     try {
       const result = await registerCompany(formData);
       if (result.success) {
-        setMessage(result.message);
-        // Redirect to profile page for completion
-        navigate('/profile', { state: { from: '/home', message: 'Please complete your profile to access full features' } });
+        // Redirect to OTP verification page
+        navigate('/verify-otp', {
+          state: {
+            email: formData.email,
+            userType: 'company'
+          }
+        });
       } else {
         setMessage(result.message);
       }
