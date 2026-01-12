@@ -34,7 +34,7 @@ body {
 
 /* Main content area */
 .main-content {
-  padding-top: 12rem; /* Base spacing; guest-specific override below */
+  padding-top: 24rem; /* Base spacing; guest-specific override below */
   background-image: url('../assets/background.jpg');
   background-size: cover;
   background-position: center;
@@ -493,13 +493,26 @@ body {
 
 /* Welcome Banner Styles */
 .welcome-banner {
-  background: #ffad7e;
-  color: white;
-  padding: 60px 20px;
-  border-radius: 15px;
-  margin: 0 auto 20px;
+  background: #ffffff;
+  color: #333;
+  padding: 70px 30px;
+  border-radius: 20px;
+  margin: 0 auto 30px;
   max-width: 1200px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 30px rgba(255, 145, 77, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #ff914d 0%, #ff7a3d 50%, #ff914d 100%);
 }
 
 .welcome-content {
@@ -508,38 +521,47 @@ body {
 }
 
 .welcome-banner h1 {
-  font-size: 3.5em;
-  margin: 0 0 10px;
-  font-weight: 700;
+  font-size: 3.8em;
+  margin: 0 0 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ff914d 0%, #ff7a3d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
 }
 
 .tagline {
-  font-size: 1.5em;
-  margin: 0 0 40px;
-  opacity: 0.95;
-  font-weight: 300;
-  color: #ffffff;
+  font-size: 1.4em;
+  margin: 0 0 50px;
+  font-weight: 400;
+  color: #555;
+  line-height: 1.5;
 }
 
 .value-proposition {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 30px;
-  border-radius: 10px;
-  margin-bottom: 40px;
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(255, 145, 77, 0.06) 0%, rgba(255, 122, 61, 0.04) 100%);
+  padding: 40px;
+  border-radius: 16px;
+  margin-bottom: 50px;
+  border: 1px solid rgba(255, 145, 77, 0.12);
+  position: relative;
 }
 
 .value-proposition h2 {
-  font-size: 2em;
-  margin: 0 0 15px;
-  color: white;
+  font-size: 2.2em;
+  margin: 0 0 20px;
+  color: #ff914d;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .value-proposition p {
-  font-size: 1.2em;
-  line-height: 1.6;
+  font-size: 1.15em;
+  line-height: 1.7;
   margin: 0;
-  color: #ffffff;
+  color: #444;
 }
 
 /* Features Grid */
@@ -551,49 +573,84 @@ body {
 }
 
 .feature-card {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 25px;
-  border-radius: 10px;
+  background: #ffffff;
+  padding: 35px 25px;
+  border-radius: 16px;
   text-align: center;
-  transition: transform 0.3s ease, background 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid rgba(255, 145, 77, 0.15);
+  box-shadow: 0 2px 12px rgba(255, 145, 77, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ff914d 0%, #ff7a3d 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover::before {
+  transform: scaleX(1);
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-8px);
+  box-shadow: 0 8px 24px rgba(255, 145, 77, 0.2);
+  border-color: rgba(255, 145, 77, 0.3);
 }
 
 .feature-icon {
-  font-size: 3em;
-  margin-bottom: 15px;
+  font-size: 3.5em;
+  margin-bottom: 20px;
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  background: linear-gradient(135deg, rgba(255, 145, 77, 0.1) 0%, rgba(255, 122, 61, 0.08) 100%);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+  background: linear-gradient(135deg, rgba(255, 145, 77, 0.15) 0%, rgba(255, 122, 61, 0.12) 100%);
+  transform: scale(1.05);
 }
 
 .feature-card h3 {
-  font-size: 1.4em;
-  margin: 0 0 10px;
+  font-size: 1.5em;
+  margin: 0 0 12px;
+  color: #333;
+  font-weight: 600;
 }
 
 .feature-card p {
   font-size: 1em;
-  line-height: 1.5;
+  line-height: 1.6;
   margin: 0;
-  opacity: 0.9;
+  color: #666;
 }
 
 /* How It Works Section */
 .how-it-works {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 40px;
-  border-radius: 10px;
-  margin-bottom: 40px;
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(255, 145, 77, 0.05) 0%, rgba(255, 122, 61, 0.03) 100%);
+  padding: 50px 40px;
+  border-radius: 20px;
+  margin-bottom: 50px;
+  border: 1px solid rgba(255, 145, 77, 0.12);
 }
 
 .how-it-works h2 {
   font-size: 2.5em;
   margin: 0 0 30px;
   text-align: center;
+  color: #ff914d;
 }
 
 .steps {
@@ -612,38 +669,41 @@ body {
   width: 50px;
   height: 50px;
   line-height: 50px;
-  background: white;
-  color: #ff914d;
+  background: linear-gradient(135deg, #ff914d 0%, #ff7a3d 100%);
+  color: white;
   border-radius: 50%;
   font-size: 1.5em;
   font-weight: bold;
   margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(255, 145, 77, 0.3);
 }
 
 .step h4 {
   font-size: 1.3em;
   margin: 0 0 10px;
+  color: #ff914d;
 }
 
 .step p {
   font-size: 1em;
   line-height: 1.5;
   margin: 0;
-  opacity: 0.9;
+  color: #555;
 }
 
 /* CTA Section */
 .cta-section {
   text-align: center;
-  padding: 30px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
+  padding: 50px 30px;
+  background: linear-gradient(135deg, rgba(255, 145, 77, 0.06) 0%, rgba(255, 122, 61, 0.04) 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 145, 77, 0.12);
 }
 
 .cta-section h2 {
   font-size: 2.5em;
   margin: 0 0 30px;
+  color: #ff914d;
 }
 
 .cta-buttons {
@@ -689,21 +749,23 @@ body {
 .login-prompt {
   font-size: 1.1em;
   margin: 0;
+  color: #555;
 }
 
 .link-btn {
   background: none;
   border: none;
-  color: white;
+  color: #ff914d;
   text-decoration: underline;
   cursor: pointer;
   font-size: inherit;
   padding: 0;
   font-weight: 600;
+  transition: color 0.2s ease;
 }
 
 .link-btn:hover {
-  color: #ffed4e;
+  color: #ff7a3d;
 }
 
 /* Responsive adjustments */
