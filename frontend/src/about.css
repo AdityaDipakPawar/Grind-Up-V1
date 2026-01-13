@@ -43,32 +43,87 @@ background-repeat: no-repeat;
     margin: 0 auto;
 }
 
-.vision-section,
-.mission-section {
+.about-header {
     text-align: center;
-    margin-bottom: 50px;
-    padding: 30px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 60px;
+    padding-top: 40px;
 }
 
-.vision-section h2,
-.mission-section h2 {
-    font-size: 28px;
-    margin-bottom: 20px;
-    color: #333;
+.about-header h1 {
+    font-size: 3.5em;
+    font-weight: 800;
+    color: #ff914d;
+    letter-spacing: 2px;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.founder-section,
+.cto-section {
+    margin-bottom: 60px;
+    padding: 50px 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #ff914d;
+    position: relative;
+    overflow: hidden;
+}
+
+.founder-section::before,
+.cto-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, rgba(255, 145, 77, 0.1) 0%, rgba(240, 78, 35, 0.05) 100%);
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+}
+
+.founder-content,
+.cto-content {
+    position: relative;
+    z-index: 1;
+}
+
+.founder-text,
+.cto-text {
+    font-size: 1.15em;
+    line-height: 1.9;
+    color: #4a5568;
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.founder-text:last-of-type,
+.cto-text:last-of-type {
+    margin-bottom: 40px;
+}
+
+.founder-signature,
+.cto-signature {
+    text-align: right;
+    padding-top: 30px;
+    border-top: 2px solid rgba(255, 145, 77, 0.2);
+    margin-top: 30px;
+}
+
+.signature-name {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: #ff914d;
+    margin: 0 0 8px 0;
+    letter-spacing: 0.5px;
+}
+
+.signature-title {
+    font-size: 1.1em;
+    color: #718096;
+    margin: 0;
     font-weight: 600;
-}
-
-.vision-section p,
-.mission-section p {
-    font-size: 16px;
-    line-height: 1.6;
-    color: #666;
-    font-style: italic;
-    max-width: 800px;
-    margin: 0 auto;
 }
 
 .blogs-section {
@@ -113,21 +168,32 @@ background-repeat: no-repeat;
         padding: 0;
     }
     
-    .vision-section,
-    .mission-section {
-        padding: 20px 16px;
-        margin-bottom: 24px;
+    .about-header h1 {
+        font-size: 2.5em;
+    }
+
+    .founder-section,
+    .cto-section {
+        padding: 30px 24px;
+        margin-bottom: 40px;
     }
     
-    .vision-section h2,
-    .mission-section h2,
+    .founder-text,
+    .cto-text {
+        font-size: 1em;
+        line-height: 1.8;
+    }
+
+    .signature-name {
+        font-size: 1.15em;
+    }
+
+    .signature-title {
+        font-size: 1em;
+    }
+    
     .blogs-section h2 {
         font-size: 22px;
-    }
-    
-    .vision-section p,
-    .mission-section p {
-        font-size: 15px;
     }
     
     .blogs-grid {
@@ -216,13 +282,21 @@ background-repeat: no-repeat;
         flex-direction: column;
         height: auto;
     }
-    .vision-section,
-    .mission-section {
-        padding: 15px;
+    .about-header h1 {
+        font-size: 2em;
+        letter-spacing: 1px;
     }
-    .vision-section h2,
-    .mission-section h2 {
-        font-size: 22px;
+
+    .founder-section,
+    .cto-section {
+        padding: 24px 20px;
+        margin-bottom: 30px;
+    }
+
+    .founder-text,
+    .cto-text {
+        font-size: 0.95em;
+        line-height: 1.7;
     }
     .blogs-grid {
         grid-template-columns: 1fr;
@@ -238,17 +312,29 @@ background-repeat: no-repeat;
 }
 
 @media (max-width: 480px) {
-    .vision-section,
-    .mission-section {
-        padding: 10px;
+    .about-header h1 {
+        font-size: 1.8em;
     }
-    .vision-section h2,
-    .mission-section h2 {
-        font-size: 18px;
+
+    .founder-section,
+    .cto-section {
+        padding: 20px 16px;
+        margin-bottom: 24px;
     }
-    .vision-section p,
-    .mission-section p {
-        font-size: 12px;
+
+    .founder-text,
+    .cto-text {
+        font-size: 0.9em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .signature-name {
+        font-size: 1em;
+    }
+
+    .signature-title {
+        font-size: 0.9em;
     }
     .blogs-grid {
         gap: 10px;

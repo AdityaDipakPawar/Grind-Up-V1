@@ -64,6 +64,7 @@ const Navbar = () => {
           <NavLink to="/invite" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Invites</NavLink>
         )}
         
+        <NavLink to="/about" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>About Us</NavLink>
         <NavLink to="/contact" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Contact us</NavLink>
       </nav>
       <div className="user-actions">

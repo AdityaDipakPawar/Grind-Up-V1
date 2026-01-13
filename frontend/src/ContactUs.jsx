@@ -26,7 +26,7 @@ const ContactUs = () => (
               </div>
               <div className="contact-details">
                 <h4>Email</h4>
-                <p>07grindup@gmail.com</p>
+                <p>pastedhanashree@grindup.co</p>
               </div>
             </div>
             <div className="contact-item">
@@ -35,7 +35,7 @@ const ContactUs = () => (
               </div>
               <div className="contact-details">
                 <h4>Address</h4>
-                <p>123 Business District<br />Mumbai, Maharashtra</p>
+                <p>Mumbai, Maharashtra India</p>
               </div>
             </div>
             <div className="contact-item">

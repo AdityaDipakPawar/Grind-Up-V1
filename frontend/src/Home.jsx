@@ -208,6 +208,65 @@ const Home = () => {
                   </div>
                 </div>
 
+                <div className="testimonials-section">
+                  <h2>What Our Users Say</h2>
+                  <div className="testimonials-grid">
+                    <div className="testimonial-card">
+                      <div className="testimonial-content">
+                        <p className="testimonial-text">"GrindUp made my job search intentional. Instead of sending out random applications, I focused on the right opportunities and prepared accordingly. That clarity turned into an interview and ultimately a successful placement."</p>
+                      </div>
+                      <div className="testimonial-author">
+                        <div className="author-name">— Risa Almeida</div>
+                      </div>
+                    </div>
+
+                    <div className="testimonial-card">
+                      <div className="testimonial-content">
+                        <p className="testimonial-text">"What sets GrindUp apart is trust. It eliminates fake opportunities by verifying both colleges and companies and connecting them directly. That transparency gave me clarity instead of confusion. I was applying to hundreds of jobs, But Grind up helped me to prepare with direction, and that's how I secured my placement."</p>
+                      </div>
+                      <div className="testimonial-author">
+                        <div className="author-name">— Trupti Wadkar</div>
+                      </div>
+                    </div>
+
+                    <div className="testimonial-card">
+                      <div className="testimonial-content">
+                        <p className="testimonial-text">"Getting selected as a Flutter Developer at Korslet Pvt. Ltd. through grindup.co was a very smooth and positive experience. The entire process was clearly structured, hassle-free, and kept me informed at every stage. It really helped me stay confident and focused on my preparation. I'm grateful for their support in helping me land this opportunity."</p>
+                      </div>
+                      <div className="testimonial-author">
+                        <div className="author-name">— Jaydeep Katva</div>
+                      </div>
+                    </div>
+
+                    <div className="testimonial-card">
+                      <div className="testimonial-content">
+                        <p className="testimonial-text">"GrindUp turned my confusion into a clear and structured preparation plan. Their guidance helped me focus on the right skills and confidently secure my placement."</p>
+                      </div>
+                      <div className="testimonial-author">
+                        <div className="author-name">— Sneha Zalte</div>
+                      </div>
+                    </div>
+
+                    <div className="testimonial-card">
+                      <div className="testimonial-content">
+                        <p className="testimonial-text">"The biggest help I got from GrindUp was understanding how interviews actually work and what recruiters look for. The feedback and guidance improved my confidence and interview performance. I wouldn't have reached this stage without that support."</p>
+                      </div>
+                      <div className="testimonial-author">
+                        <div className="author-name">— Shruti Shah</div>
+                      </div>
+                    </div>
+
+                    <div className="testimonial-card">
+                      <div className="testimonial-content">
+                        <p className="testimonial-text">"I had skills and certifications, but they were not aligned with the role I was targeting. GrindUp helped me identify this gap and guided me on what to focus on instead of learning random things. That focus helped me crack interviews and get placed."</p>
+                      </div>
+                      <div className="testimonial-author">
+                        <div className="author-name">— Gaurav Patil</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="cta-section">
                   <h2>Ready to Get Started?</h2>
                   <div className="cta-buttons">
