@@ -3,6 +3,7 @@ const Job = require('../models/Job');
 const JobApplication = require('../models/JobApplication');
 const College = require('../models/College');
 const JobPosts = require('../models/JobPosts');
+const Company = require('../models/Company');
 
 // Send invite to college (company invites college for a job)
 exports.sendInvite = async (req, res) => {
@@ -17,7 +18,7 @@ exports.sendInvite = async (req, res) => {
       });
     }
 
-    // Check if college exists
+    // Check if college exists and get its user ID
     const college = await College.findById(collegeId);
     if (!college) {
       return res.status(404).json({
@@ -26,8 +27,15 @@ exports.sendInvite = async (req, res) => {
       });
     }
 
+    if (!college.user) {
+      return res.status(400).json({
+        success: false,
+        message: 'College profile is not properly linked to a user account'
+      });
+    }
+
     // Check if job exists and belongs to the company
-    const job = await JobPosts.findById(jobId);
+    const job = await JobPosts.findById(jobId).populate('company', 'user');
     if (!job) {
       return res.status(404).json({
         success: false,
@@ -35,7 +43,18 @@ exports.sendInvite = async (req, res) => {
       });
     }
 
-    if (job.company.toString() !== req.user.id) {
+    // Find the company associated with the logged-in user
+    const userCompany = await Company.findOne({ user: req.user.id });
+    if (!userCompany) {
+      return res.status(404).json({
+        success: false,
+        message: 'Company profile not found'
+      });
+    }
+
+    // Check if the job belongs to the user's company
+    // job.company is a Company document, so we compare _id
+    if (job.company._id.toString() !== userCompany._id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to send invite for this job'
@@ -43,6 +62,7 @@ exports.sendInvite = async (req, res) => {
     }
 
     // Check if invite already exists
+    // Use collegeId (College ID) since Invite.college now references College
     const existingInvite = await Invite.findOne({
       college: collegeId,
       job: jobId,
@@ -57,8 +77,9 @@ exports.sendInvite = async (req, res) => {
     }
 
     // Create invite
+    // Store collegeId (College ID) in the invite since Invite.college now references College
     const invite = new Invite({
-      college: collegeId,
+      college: collegeId, // Use College ID directly
       job: jobId,
       company: req.user.id,
       message: message || `You have been invited to apply for ${job.title}`,
@@ -96,7 +117,17 @@ exports.getCollegeInvites = async (req, res) => {
       });
     }
 
-    const invites = await Invite.find({ college: req.user.id })
+    // Find the College document associated with the logged-in user
+    const userCollege = await College.findOne({ user: req.user.id });
+    if (!userCollege) {
+      return res.status(404).json({
+        success: false,
+        message: 'College profile not found'
+      });
+    }
+
+    // Find invites where college matches the user's College document
+    const invites = await Invite.find({ college: userCollege._id })
       .populate('job', 'title description location salary employmentType')
       .populate('company', 'companyName email contactNo industry companySize location')
       .sort({ invitedAt: -1 });
@@ -156,9 +187,18 @@ exports.acceptInvite = async (req, res) => {
       });
     }
 
+    // Find the College document associated with the logged-in user
+    const userCollege = await College.findOne({ user: req.user.id });
+    if (!userCollege) {
+      return res.status(404).json({
+        success: false,
+        message: 'College profile not found'
+      });
+    }
+
     const invite = await Invite.findById(inviteId)
-      .populate('job')
-      .populate('company');
+      .populate('job', 'title description location salary employmentType jobType')
+      .populate('company', 'companyName email');
 
     if (!invite) {
       return res.status(404).json({
@@ -167,8 +207,8 @@ exports.acceptInvite = async (req, res) => {
       });
     }
 
-    // Check if invite belongs to the user
-    if (invite.college.toString() !== req.user.id) {
+    // Check if invite belongs to the user's college
+    if (invite.college.toString() !== userCollege._id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to accept this invite'
@@ -184,9 +224,10 @@ exports.acceptInvite = async (req, res) => {
     }
 
     // Check if already applied for this job
+    // JobApplication.applicant references College, not User
     const existingApplication = await JobApplication.findOne({
       job: invite.job._id,
-      applicant: req.user.id
+      applicant: userCollege._id
     });
 
     if (existingApplication) {
@@ -196,11 +237,15 @@ exports.acceptInvite = async (req, res) => {
       });
     }
 
+    // Get company name from User model (company field has companyName)
+    const companyName = invite.company?.companyName || 'Company';
+
     // Create job application
+    // JobApplication.applicant must be College ID, not User ID
     const application = new JobApplication({
       job: invite.job._id,
-      applicant: req.user.id,
-      coverLetter: `Applied through invitation from ${invite.company.companyName}`
+      applicant: userCollege._id, // Use College ID, not User ID
+      coverLetter: `Applied through invitation from ${companyName}`
     });
 
     await application.save();
@@ -221,6 +266,7 @@ exports.acceptInvite = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error('Error accepting invite:', err);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -242,6 +288,15 @@ exports.declineInvite = async (req, res) => {
       });
     }
 
+    // Find the College document associated with the logged-in user
+    const userCollege = await College.findOne({ user: req.user.id });
+    if (!userCollege) {
+      return res.status(404).json({
+        success: false,
+        message: 'College profile not found'
+      });
+    }
+
     const invite = await Invite.findById(inviteId);
 
     if (!invite) {
@@ -251,8 +306,8 @@ exports.declineInvite = async (req, res) => {
       });
     }
 
-    // Check if invite belongs to the user
-    if (invite.college.toString() !== req.user.id) {
+    // Check if invite belongs to the user's college
+    if (invite.college.toString() !== userCollege._id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to decline this invite'
@@ -288,10 +343,7 @@ exports.declineInvite = async (req, res) => {
 // Get invite by ID
 exports.getInviteById = async (req, res) => {
   try {
-    const invite = await Invite.findById(req.params.id)
-      .populate('job', 'title description location salary employmentType')
-      .populate('company', 'companyName email contactNo industry companySize location')
-      .populate('college', 'collegeName email contactNo');
+    const invite = await Invite.findById(req.params.id);
 
     if (!invite) {
       return res.status(404).json({
@@ -300,13 +352,33 @@ exports.getInviteById = async (req, res) => {
       });
     }
 
-    // Check if user is authorized to view this invite
-    if (invite.college.toString() !== req.user.id && invite.company.toString() !== req.user.id) {
+    // Check if user is authorized to view this invite (check before populating)
+    let isAuthorized = false;
+    
+    if (req.user.type === 'college') {
+      // Find the College document associated with the logged-in user
+      const userCollege = await College.findOne({ user: req.user.id });
+      if (userCollege && invite.college.toString() === userCollege._id.toString()) {
+        isAuthorized = true;
+      }
+    } else if (req.user.type === 'company') {
+      // For company, invite.company references User, so compare directly
+      if (invite.company.toString() === req.user.id) {
+        isAuthorized = true;
+      }
+    }
+    
+    if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to view this invite'
       });
     }
+
+    // Now populate the invite for response
+    await invite.populate('job', 'title description location salary employmentType');
+    await invite.populate('company', 'companyName email contactNo industry companySize location');
+    await invite.populate('college', 'collegeName email contactNo');
 
     res.json({
       success: true,

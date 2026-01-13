@@ -130,24 +130,36 @@ exports.loginCollege = async (req, res) => {
 // Get all colleges
 exports.getAllColleges = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, state, city } = req.query;
+    const { page = 1, limit = 100, search, state, city, approvedOnly } = req.query;
     
-    let query = { isActive: true };
+    // Show all non-rejected colleges by default (pending + approved)
+    // Companies can invite colleges regardless of approval status
+    // Admins can filter by passing approvedOnly=true to see only approved
+    let query = {};
+    
+    if (approvedOnly === 'true' || approvedOnly === true) {
+      // Only show approved colleges
+      query.approvalStatus = 'approved';
+    } else {
+      // Default: show all non-rejected colleges (pending + approved)
+      query.approvalStatus = { $in: ['pending', 'approved'] };
+    }
     
     if (search) {
       query.$or = [
         { collegeName: new RegExp(search, 'i') },
         { universityAffiliation: new RegExp(search, 'i') },
-        { 'address.city': new RegExp(search, 'i') }
+        { collegeCity: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') }
       ];
     }
     
     if (state) {
-      query['address.state'] = new RegExp(state, 'i');
+      query.collegeCity = new RegExp(state, 'i');
     }
     
     if (city) {
-      query['address.city'] = new RegExp(city, 'i');
+      query.collegeCity = new RegExp(city, 'i');
     }
 
     const colleges = await College.find(query)
@@ -163,8 +175,9 @@ exports.getAllColleges = async (req, res) => {
       data: {
         colleges,
         totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        total
+        currentPage: parseInt(page),
+        total,
+        limit: parseInt(limit)
       }
     });
   } catch (error) {

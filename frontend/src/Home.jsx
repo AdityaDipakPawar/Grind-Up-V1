@@ -113,7 +113,9 @@ const Home = () => {
       
       if (response.ok && data?.success) {
         alert("Application submitted successfully!");
-        fetchAppliedJobs();
+        if (user?.type === "college") {
+          fetchAppliedJobs();
+        }
         fetchJobs(); // Refresh jobs to update applied status
       } else {
         const errorMessage = data?.message || data?.error || `Failed to apply. Status: ${response.status}`;
@@ -131,7 +133,7 @@ const Home = () => {
   };
 
   const isJobApplied = (jobId) => {
-    return appliedJobs.some(application => application.job._id === jobId);
+    return appliedJobs.some(application => application.job?._id === jobId);
   };
 
   const formatSalary = (salary) => {

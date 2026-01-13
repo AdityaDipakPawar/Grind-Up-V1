@@ -34,7 +34,7 @@ body {
 
 /* Main content area */
 .main-content {
-  padding-top: 24rem; /* Base spacing; guest-specific override below */
+  /* padding-top: 24rem; Base spacing; guest-specific override below */
   background-image: url('../assets/background.jpg');
   background-size: cover;
   background-position: center;
@@ -45,7 +45,7 @@ body {
 
 /* Authenticated dashboards: tighter spacing under navbar */
 .main-content.main-auth {
-  padding-top: 3rem;
+  padding-top: 0rem;
 }
 
 /* Guest landing: give more breathing room under navbar */
@@ -54,7 +54,7 @@ body {
 }
 
 .main-content > .company-actions {
-  padding-top: 57rem;
+  padding-top: 0rem;
 }
 
 /* Post-job page uses main-auth class for consistent authenticated spacing */
@@ -856,19 +856,19 @@ body {
 
 /* padding for home page of non auth user */
 .nonAuthUser {
-  padding-top: 68rem;
+  padding-top: 0rem;
 }
 
 /* padding for home page of college */
 .authCollege {
-  padding-top: 50rem;
+  padding-top: 0rem;
 }
 
 /* padding for home page of company */
 .authCompany {
-  padding-top: 20rem;
+  padding-top: 0rem;
 }
 
 .company-actions {
-  padding-top: 23rem;
+  padding-top: 0rem;
 }
