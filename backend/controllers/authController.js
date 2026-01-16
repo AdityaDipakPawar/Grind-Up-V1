@@ -4,6 +4,7 @@ const Company = require('../models/Company');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const emailService = require('../services/emailService');
+const { ensureConnected } = require('../config/database');
 
 // Helper function to generate 6-digit OTP
 const generateOTP = () => {
@@ -238,8 +239,36 @@ exports.login = async (req, res) => {
       });
     }
     
+    // Ensure database is connected before querying
+    const isConnected = await ensureConnected();
+    if (!isConnected) {
+      console.error('Database connection failed');
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection unavailable. Please try again in a moment.'
+      });
+    }
+    
     // Find user
-    const user = await User.findOne({ email });
+    let user;
+    try {
+      user = await User.findOne({ email });
+    } catch (dbError) {
+      console.error('Database query error:', dbError);
+      // Check if it's a buffering error
+      if (dbError.message && dbError.message.includes('buffering')) {
+        return res.status(503).json({
+          success: false,
+          message: 'Database connection is being established. Please try again in a moment.'
+        });
+      }
+      return res.status(500).json({
+        success: false,
+        message: 'Database error. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+      });
+    }
+    
     if (!user) {
       return res.status(400).json({ 
         success: false, 

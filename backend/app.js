@@ -36,8 +36,12 @@ app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 app.use(express.json());
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (non-blocking for serverless)
+// Connection will be ensured before each request in controllers
+connectDB().catch(err => {
+  console.error('Initial database connection attempt failed:', err.message);
+  // Don't throw - connection will be retried on first request
+});
 
 // Routes
 const authRoutes = require('./routes/auth');
