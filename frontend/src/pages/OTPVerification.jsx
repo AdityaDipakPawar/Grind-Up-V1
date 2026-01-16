@@ -12,11 +12,13 @@ const OTPVerification = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [devOTP, setDevOTP] = useState(null); // Store OTP for development mode
   const inputRefs = useRef([]);
 
   // Get email and userType from location state or navigate back if missing
   const email = location.state?.email;
   const userType = location.state?.userType;
+  const devOTPFromState = location.state?.devOTP; // OTP from registration if email failed
 
   useEffect(() => {
     if (!email) {
@@ -161,7 +163,16 @@ const OTPVerification = () => {
         setOtp(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       } else {
-        setMessage(data.message || 'Failed to resend OTP. Please try again.');
+        let errorMessage = data.message || 'Failed to resend OTP. Please try again.';
+        // In development, if OTP is included in response, show it
+        if (data.otp && import.meta.env.MODE === 'development') {
+          setDevOTP(data.otp);
+          errorMessage += ` (Development Mode: OTP is ${data.otp})`;
+          console.log('⚠️ DEVELOPMENT MODE: OTP received in response:', data.otp);
+        } else {
+          setDevOTP(null);
+        }
+        setMessage(errorMessage);
       }
     } catch (error) {
       console.error('Resend OTP error:', error);
@@ -182,6 +193,14 @@ const OTPVerification = () => {
     inputRefs.current[0]?.focus();
   }, []);
 
+  // Set dev OTP from location state if available
+  useEffect(() => {
+    if (devOTPFromState && import.meta.env.MODE === 'development') {
+      setDevOTP(devOTPFromState);
+      console.log('⚠️ DEVELOPMENT MODE: OTP received from registration:', devOTPFromState);
+    }
+  }, [devOTPFromState]);
+
   if (!email) {
     return null;
   }
@@ -198,6 +217,28 @@ const OTPVerification = () => {
           {message && (
             <div className={`message ${message.includes('success') || message.includes('resent') ? 'success' : 'error'}`}>
               {message}
+            </div>
+          )}
+          {devOTP && import.meta.env.MODE === 'development' && (
+            <div style={{
+              background: '#fff3cd',
+              border: '2px solid #ffc107',
+              borderRadius: '8px',
+              padding: '15px',
+              margin: '15px 0',
+              textAlign: 'center'
+            }}>
+              <strong>🔧 Development Mode:</strong> Email failed, but here's your OTP: 
+              <div style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: '#ff914d',
+                letterSpacing: '4px',
+                marginTop: '10px',
+                fontFamily: 'monospace'
+              }}>
+                {devOTP}
+              </div>
             </div>
           )}
           <form onSubmit={handleVerify}>

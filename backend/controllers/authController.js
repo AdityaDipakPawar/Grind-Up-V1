@@ -55,14 +55,20 @@ exports.registerCollege = async (req, res) => {
     const emailSent = await emailService.sendOTPEmail(email, otp, collegeName, 'college');
     if (!emailSent) {
       console.error(`Failed to send OTP email to ${email}`);
+      // In development mode, log OTP to console for testing
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`\n⚠️  DEVELOPMENT MODE: OTP for ${email} is: ${otp}\n`);
+      }
       // Return error if email fails - user should know about the issue
       return res.status(500).json({
         success: false,
-        message: 'Registration successful, but we could not send the verification email. Please check your email configuration or contact support. You can try resending the OTP from the verification page.',
+        message: 'Registration successful, but we could not send the verification email. Please check your email configuration (SMTP settings) or contact support. You can try resending the OTP from the verification page.',
         data: {
           userId: user._id,
           email: user.email,
-          userType: user.type
+          userType: user.type,
+          // In development, include OTP in response for testing
+          ...(process.env.NODE_ENV === 'development' && { otp })
         }
       });
     }
@@ -183,14 +189,20 @@ exports.registerCompany = async (req, res) => {
     const emailSent = await emailService.sendOTPEmail(email, otp, companyName, 'company');
     if (!emailSent) {
       console.error(`Failed to send OTP email to ${email}`);
+      // In development mode, log OTP to console for testing
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`\n⚠️  DEVELOPMENT MODE: OTP for ${email} is: ${otp}\n`);
+      }
       // Return error if email fails - user should know about the issue
       return res.status(500).json({
         success: false,
-        message: 'Registration successful, but we could not send the verification email. Please check your email configuration or contact support. You can try resending the OTP from the verification page.',
+        message: 'Registration successful, but we could not send the verification email. Please check your email configuration (SMTP settings) or contact support. You can try resending the OTP from the verification page.',
         data: {
           userId: user._id,
           email: user.email,
-          userType: user.type
+          userType: user.type,
+          // In development, include OTP in response for testing
+          ...(process.env.NODE_ENV === 'development' && { otp })
         }
       });
     }
@@ -454,9 +466,15 @@ exports.resendOTP = async (req, res) => {
     
     if (!emailSent) {
       console.error(`Failed to resend OTP email to ${email}`);
+      // In development mode, log OTP to console for testing
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`\n⚠️  DEVELOPMENT MODE: Resend OTP for ${email} is: ${otp}\n`);
+      }
       return res.status(500).json({
         success: false,
-        message: 'Failed to send OTP email. Please check your email configuration (SMTP settings) or contact support. The OTP has been generated and saved, but the email could not be sent.'
+        message: 'Failed to send OTP email. Please check your email configuration (SMTP settings) or contact support. The OTP has been generated and saved, but the email could not be sent.',
+        // In development, include OTP in response for testing
+        ...(process.env.NODE_ENV === 'development' && { otp })
       });
     }
     

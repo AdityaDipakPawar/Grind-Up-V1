@@ -1,18 +1,63 @@
 const nodemailer = require('nodemailer');
 
+// Check if email configuration is available
+const hasEmailConfig = () => {
+  return !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD);
+};
+
+// Log email configuration status (without exposing passwords)
+if (!hasEmailConfig()) {
+  console.warn('⚠️  Email configuration missing. Please check your .env file for SMTP settings.');
+  console.warn('   Required: SMTP_HOST, SMTP_USER, SMTP_PASSWORD');
+} else {
+  console.log('✅ Email configuration found:');
+  console.log(`   Host: ${process.env.SMTP_HOST}`);
+  console.log(`   Port: ${process.env.SMTP_PORT || 587}`);
+  console.log(`   User: ${process.env.SMTP_USER}`);
+  console.log(`   From: ${process.env.SMTP_FROM || process.env.SMTP_USER}`);
+}
+
 // Create email transporter
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: process.env.SMTP_PORT || 587,
+  port: parseInt(process.env.SMTP_PORT) || 587,
   secure: false, // true for 465, false for other ports
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD,
   },
+  // Add connection timeout
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
+// Verify transporter connection (optional, can be called on startup)
+const verifyConnection = async () => {
+  if (!hasEmailConfig()) {
+    console.error('❌ Cannot verify email connection: Configuration missing');
+    return false;
+  }
+  
+  try {
+    await transporter.verify();
+    console.log('✅ Email server connection verified successfully');
+    return true;
+  } catch (error) {
+    console.error('❌ Email server connection failed:', error.message);
+    if (error.code === 'EAUTH') {
+      console.error('   Authentication failed. Please check SMTP_USER and SMTP_PASSWORD');
+    } else if (error.code === 'ECONNECTION') {
+      console.error('   Connection failed. Please check SMTP_HOST and SMTP_PORT');
+    } else if (error.code === 'ETIMEDOUT') {
+      console.error('   Connection timeout. Please check your network or SMTP settings');
+    }
+    return false;
+  }
+};
+
 // Normalize the frontend URL to avoid double slashes when composing links
-const frontendBaseUrl = (process.env.FRONTEND_URL).replace(/\/+$/, '');
+const frontendBaseUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
 
 /**
  * Send registration confirmation email to college
@@ -523,6 +568,12 @@ const sendWeeklyDigest = async (email, collegeName, newJobs) => {
  * Send OTP email for email verification
  */
 const sendOTPEmail = async (email, otp, userName, userType) => {
+  // Check if email configuration exists
+  if (!hasEmailConfig()) {
+    console.error('❌ Cannot send OTP email: SMTP configuration missing');
+    return false;
+  }
+
   try {
     const mailOptions = {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
@@ -577,20 +628,39 @@ const sendOTPEmail = async (email, otp, userName, userType) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`✅ OTP email sent to ${email}`);
+    console.log(`✅ OTP email sent successfully to ${email}`);
     return true;
   } catch (error) {
-    console.error(`❌ Error sending OTP email to ${email}:`, error);
+    console.error(`❌ Error sending OTP email to ${email}`);
     console.error('Error details:', {
       message: error.message,
       code: error.code,
       command: error.command,
-      response: error.response
+      response: error.response,
+      responseCode: error.responseCode,
+      stack: error.stack
     });
-    // Check if it's an authentication error
-    if (error.code === 'EAUTH' || error.code === 'EENVELOPE') {
-      console.error('SMTP Authentication failed. Please check SMTP_USER and SMTP_PASSWORD in .env');
+    
+    // Provide specific error messages
+    if (error.code === 'EAUTH') {
+      console.error('❌ SMTP Authentication failed. Please check:');
+      console.error('   - SMTP_USER is correct');
+      console.error('   - SMTP_PASSWORD is correct (use App Password for Gmail)');
+      console.error('   - For Gmail: Enable 2FA and use App Password, not regular password');
+    } else if (error.code === 'ECONNECTION' || error.code === 'ETIMEDOUT') {
+      console.error('❌ SMTP Connection failed. Please check:');
+      console.error('   - SMTP_HOST is correct');
+      console.error('   - SMTP_PORT is correct (587 for Gmail)');
+      console.error('   - Internet connection is working');
+      console.error('   - Firewall is not blocking the connection');
+    } else if (error.code === 'EENVELOPE') {
+      console.error('❌ Email envelope error. Please check:');
+      console.error('   - SMTP_FROM is a valid email address');
+      console.error('   - Recipient email is valid');
+    } else {
+      console.error('❌ Unknown email error. Full error:', error);
     }
+    
     return false;
   }
 };
@@ -605,4 +675,6 @@ module.exports = {
   sendRejectionEmail,
   sendWeeklyDigest,
   sendOTPEmail,
+  verifyConnection,
+  hasEmailConfig,
 };

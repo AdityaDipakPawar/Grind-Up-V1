@@ -63,10 +63,38 @@ const CollegeSignup = () => {
           }
         });
       } else {
-        setMessage(result.message || 'Registration failed. Please try again.');
+        let errorMessage = result.message || 'Registration failed. Please try again.';
+        // In development, if OTP is included in response, redirect to OTP page with it
+        if (result.otp && import.meta.env.MODE === 'development') {
+          console.log('⚠️ DEVELOPMENT MODE: OTP received in response:', result.otp);
+          // Still redirect to OTP page even if email failed, but pass the OTP
+          navigate('/verify-otp', {
+            state: {
+              email: result.email || formData.email,
+              userType: result.userType || 'college',
+              devOTP: result.otp
+            }
+          });
+          return;
+        }
+        setMessage(errorMessage);
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred. Please try again.';
+      const errorData = error.response?.data || {};
+      let errorMessage = errorData.message || error.message || 'An unexpected error occurred. Please try again.';
+      // In development, if OTP is included in response, redirect to OTP page with it
+      if (errorData.data?.otp && import.meta.env.MODE === 'development') {
+        console.log('⚠️ DEVELOPMENT MODE: OTP received in response:', errorData.data.otp);
+        // Still redirect to OTP page even if email failed, but pass the OTP
+        navigate('/verify-otp', {
+          state: {
+            email: formData.email,
+            userType: 'college',
+            devOTP: errorData.data.otp
+          }
+        });
+        return;
+      }
       setMessage(errorMessage);
       console.error('Registration error:', error);
     } finally {

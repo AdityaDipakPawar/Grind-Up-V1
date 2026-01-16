@@ -96,8 +96,17 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: response.message };
       }
     } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed. Please try again.';
-      return { success: false, message };
+      const errorData = error.response?.data || {};
+      const message = errorData.message || 'Registration failed. Please try again.';
+      return { 
+        success: false, 
+        message,
+        // Preserve OTP data if available (for development mode)
+        otp: errorData.data?.otp,
+        email: errorData.data?.email,
+        userType: errorData.data?.userType,
+        status: error.response?.status
+      };
     } finally {
       setLoading(false);
     }
