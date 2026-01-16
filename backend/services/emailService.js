@@ -17,20 +17,31 @@ if (!hasEmailConfig()) {
   console.log(`   From: ${process.env.SMTP_FROM || process.env.SMTP_USER}`);
 }
 
-// Create email transporter
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT) || 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  // Add connection timeout
-  connectionTimeout: 10000, // 10 seconds
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
+// Create email transporter with error handling
+let transporter;
+try {
+  if (hasEmailConfig()) {
+    transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT) || 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+      // Add connection timeout
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+    });
+  } else {
+    transporter = null;
+    console.warn('⚠️  Email transporter not created: Configuration missing');
+  }
+} catch (error) {
+  console.error('❌ Error creating email transporter:', error);
+  transporter = null;
+}
 
 // Verify transporter connection (optional, can be called on startup)
 const verifyConnection = async () => {
@@ -57,7 +68,16 @@ const verifyConnection = async () => {
 };
 
 // Normalize the frontend URL to avoid double slashes when composing links
-const frontendBaseUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+const getFrontendBaseUrl = () => {
+  try {
+    const url = process.env.FRONTEND_URL || 'http://localhost:5173';
+    return url ? String(url).replace(/\/+$/, '') : 'http://localhost:5173';
+  } catch (error) {
+    console.error('Error getting frontend URL:', error);
+    return 'http://localhost:5173';
+  }
+};
+const frontendBaseUrl = getFrontendBaseUrl();
 
 /**
  * Send registration confirmation email to college
@@ -571,6 +591,18 @@ const sendOTPEmail = async (email, otp, userName, userType) => {
   // Check if email configuration exists
   if (!hasEmailConfig()) {
     console.error('❌ Cannot send OTP email: SMTP configuration missing');
+    return false;
+  }
+
+  // Check if transporter is available
+  if (!transporter) {
+    console.error('❌ Cannot send OTP email: Email transporter not initialized');
+    return false;
+  }
+
+  // Validate inputs
+  if (!email || !otp) {
+    console.error('❌ Cannot send OTP email: Missing email or OTP');
     return false;
   }
 
