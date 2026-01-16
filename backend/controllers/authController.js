@@ -230,8 +230,16 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email and password are required'
+      });
+    }
+    
     // Find user
-    const user = await User.findOne({ email }).maxTimeMS(10000); // 10 second timeout for user query
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ 
         success: false, 
@@ -260,6 +268,14 @@ exports.login = async (req, res) => {
     }
     
     // Generate JWT token
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set in environment variables');
+      return res.status(500).json({
+        success: false,
+        message: 'Server configuration error. Please contact support.'
+      });
+    }
+    
     const token = jwt.sign(
       { id: user._id, email: user.email, type: user.type }, 
       process.env.JWT_SECRET, 
@@ -272,9 +288,11 @@ exports.login = async (req, res) => {
     
     try {
       const ProfileModel = user.type === 'college' ? College : Company;
-      const profile = await ProfileModel.findOne({ user: user._id }).maxTimeMS(5000); // 5 second timeout for profile query
-      profileComplete = isProfileComplete(profile, user.type);
-      approvalStatus = profile?.approvalStatus || 'pending';
+      if (ProfileModel) {
+        const profile = await ProfileModel.findOne({ user: user._id });
+        profileComplete = isProfileComplete(profile, user.type);
+        approvalStatus = profile?.approvalStatus || 'pending';
+      }
     } catch (profileError) {
       // If profile check fails, continue with login but log the error
       console.warn('Profile check failed during login (non-critical):', profileError.message);
@@ -299,6 +317,7 @@ exports.login = async (req, res) => {
     });
   } catch (err) {
     console.error('Login error:', err);
+    console.error('Error stack:', err.stack);
     
     // Check if it's a timeout error
     if (err.name === 'MongoServerError' || err.message?.includes('timeout') || err.message?.includes('exceeded')) {
