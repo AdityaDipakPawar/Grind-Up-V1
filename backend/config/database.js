@@ -26,18 +26,11 @@ const connectDB = async () => {
       throw new Error('MONGO_URI is not set in environment variables');
     }
 
-    const options = {
-      serverSelectionTimeoutMS: 10000, // 10 seconds
-      socketTimeoutMS: 30000, // 30 seconds
-      connectTimeoutMS: 10000, // 10 seconds
-      family: 4,
-      maxPoolSize: 10,
-      minPoolSize: 1, // Reduced for serverless
-      bufferCommands: false, // Disable mongoose buffering - fail fast if not connected
-      bufferMaxEntries: 0, // Disable mongoose buffering
-    };
-
-    connectionPromise = mongoose.connect(uri, options);
+    // Simple connection options - avoid any potentially unsupported options
+    connectionPromise = mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 30000,
+    });
     const conn = await connectionPromise;
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host} (${process.env.NODE_ENV} mode)`);
