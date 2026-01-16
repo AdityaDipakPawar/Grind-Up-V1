@@ -126,7 +126,8 @@ const OTPVerification = () => {
       }
     } catch (error) {
       console.error('OTP verification error:', error);
-      setMessage('An error occurred. Please try again.');
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred during verification. Please try again.';
+      setMessage(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -164,7 +165,13 @@ const OTPVerification = () => {
       }
     } catch (error) {
       console.error('Resend OTP error:', error);
-      setMessage('An error occurred. Please try again.');
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred while resending OTP. Please try again.';
+      setMessage(errorMessage);
+      
+      // If user not found, provide helpful message
+      if (errorMessage.includes('not found') || error.response?.status === 404) {
+        setMessage('User not found. Please register again or contact support.');
+      }
     } finally {
       setIsLoading(false);
     }

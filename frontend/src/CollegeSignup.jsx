@@ -63,10 +63,12 @@ const CollegeSignup = () => {
           }
         });
       } else {
-        setMessage(result.message);
+        setMessage(result.message || 'Registration failed. Please try again.');
       }
     } catch (error) {
-      setMessage('An unexpected error occurred. Please try again.');
+      const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred. Please try again.';
+      setMessage(errorMessage);
+      console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
     }

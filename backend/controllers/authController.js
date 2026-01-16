@@ -55,8 +55,16 @@ exports.registerCollege = async (req, res) => {
     const emailSent = await emailService.sendOTPEmail(email, otp, collegeName, 'college');
     if (!emailSent) {
       console.error(`Failed to send OTP email to ${email}`);
-      // Still return success but log the error - email might fail but user is registered
-      // In production, you might want to queue the email or handle this differently
+      // Return error if email fails - user should know about the issue
+      return res.status(500).json({
+        success: false,
+        message: 'Registration successful, but we could not send the verification email. Please check your email configuration or contact support. You can try resending the OTP from the verification page.',
+        data: {
+          userId: user._id,
+          email: user.email,
+          userType: user.type
+        }
+      });
     }
     
     res.status(201).json({
@@ -175,8 +183,16 @@ exports.registerCompany = async (req, res) => {
     const emailSent = await emailService.sendOTPEmail(email, otp, companyName, 'company');
     if (!emailSent) {
       console.error(`Failed to send OTP email to ${email}`);
-      // Still return success but log the error - email might fail but user is registered
-      // In production, you might want to queue the email or handle this differently
+      // Return error if email fails - user should know about the issue
+      return res.status(500).json({
+        success: false,
+        message: 'Registration successful, but we could not send the verification email. Please check your email configuration or contact support. You can try resending the OTP from the verification page.',
+        data: {
+          userId: user._id,
+          email: user.email,
+          userType: user.type
+        }
+      });
     }
     
     res.status(201).json({
@@ -224,7 +240,10 @@ exports.login = async (req, res) => {
     if (user.type !== 'admin' && !user.isEmailVerified) {
       return res.status(403).json({ 
         success: false, 
-        message: 'Please verify your email before logging in. Check your inbox for the verification code.' 
+        message: 'Please verify your email before logging in. Check your inbox for the verification code. If you did not receive it, you can resend it from the verification page.',
+        requiresVerification: true,
+        email: user.email,
+        userType: user.type
       });
     }
     
@@ -402,12 +421,12 @@ exports.resendOTP = async (req, res) => {
       });
     }
     
-    // Find user
-    const user = await User.findOne({ email });
+    // Find user by email (case-insensitive search)
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found with this email address. Please check your email or register again.'
       });
     }
     
@@ -415,7 +434,7 @@ exports.resendOTP = async (req, res) => {
     if (user.isEmailVerified) {
       return res.status(400).json({
         success: false,
-        message: 'Email is already verified'
+        message: 'Email is already verified. You can login directly.'
       });
     }
     
@@ -434,9 +453,10 @@ exports.resendOTP = async (req, res) => {
     const emailSent = await emailService.sendOTPEmail(email, otp, userName, userType);
     
     if (!emailSent) {
+      console.error(`Failed to resend OTP email to ${email}`);
       return res.status(500).json({
         success: false,
-        message: 'Failed to send OTP email. Please check your email configuration or try again later.'
+        message: 'Failed to send OTP email. Please check your email configuration (SMTP settings) or contact support. The OTP has been generated and saved, but the email could not be sent.'
       });
     }
     
@@ -445,9 +465,10 @@ exports.resendOTP = async (req, res) => {
       message: 'OTP has been resent to your email'
     });
   } catch (err) {
+    console.error('Resend OTP error:', err);
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: 'Server error while resending OTP',
       error: err.message
     });
   }

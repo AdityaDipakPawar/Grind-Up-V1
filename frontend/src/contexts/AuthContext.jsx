@@ -67,8 +67,16 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: response.message };
       }
     } catch (error) {
-      const message = error.response?.data?.message || 'Login failed. Please try again.';
-      return { success: false, message };
+      const errorData = error.response?.data || {};
+      const message = errorData.message || 'Login failed. Please try again.';
+      return { 
+        success: false, 
+        message,
+        requiresVerification: errorData.requiresVerification,
+        email: errorData.email,
+        userType: errorData.userType,
+        status: error.response?.status
+      };
     } finally {
       setLoading(false);
     }

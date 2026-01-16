@@ -86,10 +86,22 @@ const Login = () => {
         // Redirect to profile page if profile is incomplete, otherwise to home
         navigate('/home');
       } else {
+        // Check if the error is about email verification (403 status)
+        if (result.status === 403 && (result.message.includes('verify your email') || result.requiresVerification)) {
+          // Redirect to OTP verification page with email and userType from response
+          navigate('/verify-otp', {
+            state: {
+              email: result.email || formData.email,
+              userType: result.userType || 'college'
+            }
+          });
+          return; // Don't set error message since we're redirecting
+        }
         setMessage(result.message);
       }
     } catch (error) {
-      setMessage('An unexpected error occurred. Please try again.');
+      const errorMessage = error.message || 'An unexpected error occurred. Please try again.';
+      setMessage(errorMessage);
     } finally {
       setIsLoading(false);
     }
