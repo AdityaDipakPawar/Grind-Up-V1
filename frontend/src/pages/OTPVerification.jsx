@@ -127,8 +127,22 @@ const OTPVerification = () => {
         setMessage(data.message || 'Verification failed. Please try again.');
       }
     } catch (error) {
-      console.error('OTP verification error:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'An error occurred during verification. Please try again.';
+      // Handle different types of errors
+      let errorMessage = 'An error occurred during verification. Please try again.';
+      
+      if (error.response) {
+        // Server responded with error
+        errorMessage = error.response.data?.message || errorMessage;
+      } else if (error.message) {
+        // Network or other error
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      // Always display error message on screen
       setMessage(errorMessage);
     } finally {
       setIsLoading(false);
@@ -175,14 +189,30 @@ const OTPVerification = () => {
         setMessage(errorMessage);
       }
     } catch (error) {
-      console.error('Resend OTP error:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'An error occurred while resending OTP. Please try again.';
-      setMessage(errorMessage);
+      // Handle different types of errors
+      let errorMessage = 'An error occurred while resending OTP. Please try again.';
       
-      // If user not found, provide helpful message
-      if (errorMessage.includes('not found') || error.response?.status === 404) {
-        setMessage('User not found. Please register again or contact support.');
+      if (error.response) {
+        // Server responded with error
+        errorMessage = error.response.data?.message || errorMessage;
+        
+        // If user not found, provide helpful message
+        if (error.response.status === 404 || errorMessage.includes('not found')) {
+          errorMessage = 'User not found. Please register again or contact support.';
+        } else if (error.response.status === 500) {
+          errorMessage = errorMessage || 'Server error. Please try again later or contact support.';
+        }
+      } else if (error.message) {
+        // Network or other error
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        } else {
+          errorMessage = error.message;
+        }
       }
+      
+      // Always display error message on screen
+      setMessage(errorMessage);
     } finally {
       setIsLoading(false);
     }

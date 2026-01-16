@@ -463,30 +463,21 @@ exports.resendOTP = async (req, res) => {
     const userName = user.collegeName || user.companyName || email;
     const userType = user.type;
     
+    let emailSent = false;
     try {
-      const emailSent = await emailService.sendOTPEmail(email, otp, userName, userType);
-      
-      if (!emailSent) {
-        console.error(`Failed to resend OTP email to ${email}`);
-        // In development mode, log OTP to console for testing
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`\n⚠️  DEVELOPMENT MODE: Resend OTP for ${email} is: ${otp}\n`);
-        }
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to send OTP email. Please check your email configuration (SMTP settings) or contact support. The OTP has been generated and saved, but the email could not be sent.',
-          // In development, include OTP in response for testing
-          ...(process.env.NODE_ENV === 'development' && { otp })
-        });
-      }
-      
-      res.json({
-        success: true,
-        message: 'OTP has been resent to your email'
-      });
+      emailSent = await emailService.sendOTPEmail(email, otp, userName, userType);
     } catch (emailError) {
-      console.error('Error in sendOTPEmail:', emailError);
-      // Even if email fails, return a response (don't crash)
+      console.error('Error calling sendOTPEmail:', emailError);
+      console.error('Error stack:', emailError.stack);
+      emailSent = false;
+    }
+    
+    if (!emailSent) {
+      console.error(`Failed to resend OTP email to ${email}`);
+      // In development mode, log OTP to console for testing
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`\n⚠️  DEVELOPMENT MODE: Resend OTP for ${email} is: ${otp}\n`);
+      }
       return res.status(500).json({
         success: false,
         message: 'Failed to send OTP email. Please check your email configuration (SMTP settings) or contact support. The OTP has been generated and saved, but the email could not be sent.',
@@ -494,6 +485,11 @@ exports.resendOTP = async (req, res) => {
         ...(process.env.NODE_ENV === 'development' && { otp })
       });
     }
+    
+    res.json({
+      success: true,
+      message: 'OTP has been resent to your email'
+    });
   } catch (err) {
     console.error('Resend OTP error:', err);
     console.error('Error stack:', err.stack);

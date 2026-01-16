@@ -44,8 +44,8 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
-    // Log error for debugging
-    console.error('API Error:', error.response?.data || error.message);
+    // Error will be handled by the component's catch block
+    // Don't log to console here - let components handle and display errors
     return Promise.reject(error);
   }
 );

@@ -68,7 +68,13 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       const errorData = error.response?.data || {};
-      const message = errorData.message || 'Login failed. Please try again.';
+      let message = errorData.message || 'Login failed. Please try again.';
+      
+      // Handle network errors
+      if (!error.response) {
+        message = 'Network error. Please check your internet connection and try again.';
+      }
+      
       return { 
         success: false, 
         message,
@@ -97,7 +103,13 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       const errorData = error.response?.data || {};
-      const message = errorData.message || 'Registration failed. Please try again.';
+      let message = errorData.message || 'Registration failed. Please try again.';
+      
+      // Handle network errors
+      if (!error.response) {
+        message = 'Network error. Please check your internet connection and try again.';
+      }
+      
       return { 
         success: false, 
         message,

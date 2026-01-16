@@ -82,6 +82,12 @@ const CollegeSignup = () => {
     } catch (error) {
       const errorData = error.response?.data || {};
       let errorMessage = errorData.message || error.message || 'An unexpected error occurred. Please try again.';
+      
+      // Handle network errors
+      if (!error.response) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      }
+      
       // In development, if OTP is included in response, redirect to OTP page with it
       if (errorData.data?.otp && import.meta.env.MODE === 'development') {
         console.log('⚠️ DEVELOPMENT MODE: OTP received in response:', errorData.data.otp);
@@ -95,8 +101,9 @@ const CollegeSignup = () => {
         });
         return;
       }
+      
+      // Always display error message on screen
       setMessage(errorMessage);
-      console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
     }

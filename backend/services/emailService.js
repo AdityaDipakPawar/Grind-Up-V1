@@ -588,25 +588,24 @@ const sendWeeklyDigest = async (email, collegeName, newJobs) => {
  * Send OTP email for email verification
  */
 const sendOTPEmail = async (email, otp, userName, userType) => {
-  // Check if email configuration exists
-  if (!hasEmailConfig()) {
-    console.error('❌ Cannot send OTP email: SMTP configuration missing');
-    return false;
-  }
-
-  // Check if transporter is available
-  if (!transporter) {
-    console.error('❌ Cannot send OTP email: Email transporter not initialized');
-    return false;
-  }
-
-  // Validate inputs
-  if (!email || !otp) {
-    console.error('❌ Cannot send OTP email: Missing email or OTP');
-    return false;
-  }
-
   try {
+    // Check if email configuration exists
+    if (!hasEmailConfig()) {
+      console.error('❌ Cannot send OTP email: SMTP configuration missing');
+      return false;
+    }
+
+    // Check if transporter is available
+    if (!transporter) {
+      console.error('❌ Cannot send OTP email: Email transporter not initialized');
+      return false;
+    }
+
+    // Validate inputs
+    if (!email || !otp) {
+      console.error('❌ Cannot send OTP email: Missing email or OTP');
+      return false;
+    }
     const mailOptions = {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to: email,
@@ -659,9 +658,26 @@ const sendOTPEmail = async (email, otp, userName, userType) => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ OTP email sent successfully to ${email}`);
-    return true;
+    // Double-check transporter before sending
+    if (!transporter) {
+      console.error('❌ Transporter is null, cannot send email');
+      return false;
+    }
+
+    // Double-check transporter before sending
+    if (!transporter) {
+      console.error('❌ Transporter is null, cannot send email');
+      return false;
+    }
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ OTP email sent successfully to ${email}`);
+      return true;
+    } catch (sendError) {
+      // Re-throw to be caught by outer catch
+      throw sendError;
+    }
   } catch (error) {
     console.error(`❌ Error sending OTP email to ${email}`);
     console.error('Error details:', {

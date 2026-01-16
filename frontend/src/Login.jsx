@@ -100,7 +100,27 @@ const Login = () => {
         setMessage(result.message);
       }
     } catch (error) {
-      const errorMessage = error.message || 'An unexpected error occurred. Please try again.';
+      const errorData = error.response?.data || {};
+      let errorMessage = errorData.message || error.message || 'An unexpected error occurred. Please try again.';
+      
+      // Handle network errors
+      if (!error.response) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      }
+      
+      // Check if the error is about email verification (403 status)
+      if (error.response?.status === 403 && (errorMessage.includes('verify your email') || errorData.requiresVerification)) {
+        // Redirect to OTP verification page with email and userType from response
+        navigate('/verify-otp', {
+          state: {
+            email: errorData.email || formData.email,
+            userType: errorData.userType || 'college'
+          }
+        });
+        return; // Don't set error message since we're redirecting
+      }
+      
+      // Always display error message on screen
       setMessage(errorMessage);
     } finally {
       setIsLoading(false);
