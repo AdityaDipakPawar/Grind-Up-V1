@@ -7,7 +7,7 @@ const defaultBaseURL = (import.meta.env.MODE === 'production')
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || defaultBaseURL,
-  timeout: 10000,
+  timeout: 30000, // Increased to 30 seconds for login/profile operations
   headers: {
     'Content-Type': 'application/json',
   },

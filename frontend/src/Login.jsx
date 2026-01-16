@@ -103,13 +103,24 @@ const Login = () => {
       const errorData = error.response?.data || {};
       let errorMessage = errorData.message || error.message || 'An unexpected error occurred. Please try again.';
       
-      // Handle network errors
-      if (!error.response) {
-        errorMessage = 'Network error. Please check your internet connection and try again.';
+      // Handle timeout errors
+      if (error.code === 'ECONNABORTED' || error.message.includes('timeout') || error.message.includes('exceeded')) {
+        errorMessage = 'Request timed out. The server is taking too long to respond. Please try again.';
       }
-      
+      // Handle network errors
+      else if (!error.response) {
+        if (error.message.includes('Network Error') || error.message.includes('Failed to fetch')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        } else {
+          errorMessage = 'Connection error. Please try again.';
+        }
+      }
+      // Handle timeout status codes
+      else if (error.response?.status === 504) {
+        errorMessage = errorData.message || 'Server timeout. Please try again.';
+      }
       // Check if the error is about email verification (403 status)
-      if (error.response?.status === 403 && (errorMessage.includes('verify your email') || errorData.requiresVerification)) {
+      else if (error.response?.status === 403 && (errorMessage.includes('verify your email') || errorData.requiresVerification)) {
         // Redirect to OTP verification page with email and userType from response
         navigate('/verify-otp', {
           state: {

@@ -231,7 +231,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).maxTimeMS(10000); // 10 second timeout for user query
     if (!user) {
       return res.status(400).json({ 
         success: false, 
@@ -266,11 +266,20 @@ exports.login = async (req, res) => {
       { expiresIn: '1d' }
     );
     
-    // Check profile completion for login
-    const ProfileModel = user.type === 'college' ? College : Company;
-    const profile = await ProfileModel.findOne({ user: user._id });
-    const profileComplete = isProfileComplete(profile, user.type);
-    const approvalStatus = profile?.approvalStatus || 'pending';
+    // Check profile completion for login (non-blocking - if it fails, login still succeeds)
+    let profileComplete = false;
+    let approvalStatus = 'pending';
+    
+    try {
+      const ProfileModel = user.type === 'college' ? College : Company;
+      const profile = await ProfileModel.findOne({ user: user._id }).maxTimeMS(5000); // 5 second timeout for profile query
+      profileComplete = isProfileComplete(profile, user.type);
+      approvalStatus = profile?.approvalStatus || 'pending';
+    } catch (profileError) {
+      // If profile check fails, continue with login but log the error
+      console.warn('Profile check failed during login (non-critical):', profileError.message);
+      // Use default values - login still succeeds
+    }
     
     res.json({
       success: true,
@@ -289,11 +298,23 @@ exports.login = async (req, res) => {
       }
     });
   } catch (err) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error', 
-      error: err.message 
-    });
+    console.error('Login error:', err);
+    
+    // Check if it's a timeout error
+    if (err.name === 'MongoServerError' || err.message?.includes('timeout') || err.message?.includes('exceeded')) {
+      return res.status(504).json({
+        success: false,
+        message: 'Database operation timed out. Please try again.'
+      });
+    }
+    
+    if (!res.headersSent) {
+      res.status(500).json({ 
+        success: false, 
+        message: 'Server error during login. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+      });
+    }
   }
 };
 
