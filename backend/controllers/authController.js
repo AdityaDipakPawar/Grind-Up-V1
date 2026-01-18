@@ -16,8 +16,18 @@ exports.registerCollege = async (req, res) => {
   try {
     const { password, collegeName, email, contactNo } = req.body;
     
+    // Normalize email (lowercase and trim) for consistency
+    const normalizedEmail = email ? email.toLowerCase().trim() : '';
+    
+    if (!normalizedEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+    
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
@@ -34,7 +44,7 @@ exports.registerCollege = async (req, res) => {
     
     // Create user
     const user = new User({ 
-      email, 
+      email: normalizedEmail, 
       password: hashedPassword, 
       type: 'college',
       collegeName,
@@ -48,17 +58,17 @@ exports.registerCollege = async (req, res) => {
     await new College({
       user: user._id,
       collegeName,
-      email,
+      email: normalizedEmail,
       contactNo
     }).save();
 
     // Send OTP email
-    const emailSent = await emailService.sendOTPEmail(email, otp, collegeName, 'college');
+    const emailSent = await emailService.sendOTPEmail(normalizedEmail, otp, collegeName, 'college');
     if (!emailSent) {
-      console.error(`Failed to send OTP email to ${email}`);
+      console.error(`Failed to send OTP email to ${normalizedEmail}`);
       // In development mode, log OTP to console for testing
       if (process.env.NODE_ENV === 'development') {
-        console.log(`\n⚠️  DEVELOPMENT MODE: OTP for ${email} is: ${otp}\n`);
+        console.log(`\n⚠️  DEVELOPMENT MODE: OTP for ${normalizedEmail} is: ${otp}\n`);
       }
       // Return error if email fails - user should know about the issue
       return res.status(500).json({
@@ -144,8 +154,18 @@ exports.registerCompany = async (req, res) => {
   try {
     const { companyName, password, email, contactNo, industry, companySize, location } = req.body;
     
+    // Normalize email (lowercase and trim) for consistency
+    const normalizedEmail = email ? email.toLowerCase().trim() : '';
+    
+    if (!normalizedEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+    
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
@@ -162,7 +182,7 @@ exports.registerCompany = async (req, res) => {
     
     // Create user
     const user = new User({ 
-      email, 
+      email: normalizedEmail, 
       password: hashedPassword, 
       type: 'company',
       companyName,
@@ -179,7 +199,7 @@ exports.registerCompany = async (req, res) => {
     await new Company({
       user: user._id,
       companyName,
-      email,
+      email: normalizedEmail,
       contactNo,
       industry,
       companySize,
@@ -187,12 +207,12 @@ exports.registerCompany = async (req, res) => {
     }).save();
 
     // Send OTP email
-    const emailSent = await emailService.sendOTPEmail(email, otp, companyName, 'company');
+    const emailSent = await emailService.sendOTPEmail(normalizedEmail, otp, companyName, 'company');
     if (!emailSent) {
-      console.error(`Failed to send OTP email to ${email}`);
+      console.error(`Failed to send OTP email to ${normalizedEmail}`);
       // In development mode, log OTP to console for testing
       if (process.env.NODE_ENV === 'development') {
-        console.log(`\n⚠️  DEVELOPMENT MODE: OTP for ${email} is: ${otp}\n`);
+        console.log(`\n⚠️  DEVELOPMENT MODE: OTP for ${normalizedEmail} is: ${otp}\n`);
       }
       // Return error if email fails - user should know about the issue
       return res.status(500).json({
@@ -249,10 +269,13 @@ exports.login = async (req, res) => {
       });
     }
     
+    // Normalize email (lowercase and trim) for consistency
+    const normalizedEmail = email.toLowerCase().trim();
+    
     // Find user
     let user;
     try {
-      user = await User.findOne({ email });
+      user = await User.findOne({ email: normalizedEmail });
     } catch (dbError) {
       console.error('Database query error:', dbError);
       // Check if it's a buffering error
@@ -582,12 +605,35 @@ exports.verifyOTP = async (req, res) => {
       });
     }
     
-    // Find user
-    const user = await User.findOne({ email });
+    // Ensure database is connected before querying
+    const isConnected = await ensureConnected();
+    if (!isConnected) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection unavailable. Please try again in a moment.'
+      });
+    }
+    
+    // Normalize email (lowercase and trim) to match how it's stored
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // Find user by normalized email
+    let user;
+    try {
+      user = await User.findOne({ email: normalizedEmail });
+    } catch (dbError) {
+      console.error('Database query error in verifyOTP:', dbError);
+      return res.status(500).json({
+        success: false,
+        message: 'Database error. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+      });
+    }
+    
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found with this email address. Please check your email or register again.'
       });
     }
     
