@@ -58,9 +58,9 @@ body {
 }
 
 /* Post-job page uses main-auth class for consistent authenticated spacing */
-.post-job-page .main-content.main-auth {
+/* .post-job-page .main-content.main-auth {
   padding-top: 50rem;
-}
+} */
 
 /* Ensure the job form has a little internal top spacing on post-job page */
 .post-job-page .job-form-container {
