@@ -64,11 +64,11 @@ const CompanySignup = () => {
     try {
       const result = await registerCompany(formData);
       if (result.success) {
-        // Redirect to OTP verification page
+        // Redirect to OTP verification page with normalized email from backend
         navigate('/verify-otp', {
           state: {
-            email: formData.email,
-            userType: 'company'
+            email: result.email || formData.email,
+            userType: result.userType || 'company'
           }
         });
       } else {

@@ -55,11 +55,11 @@ const CollegeSignup = () => {
     try {
       const result = await registerCollege(formData);
       if (result.success) {
-        // Redirect to OTP verification page
+        // Redirect to OTP verification page with normalized email from backend
         navigate('/verify-otp', {
           state: {
-            email: formData.email,
-            userType: 'college'
+            email: result.email || formData.email,
+            userType: result.userType || 'college'
           }
         });
       } else {

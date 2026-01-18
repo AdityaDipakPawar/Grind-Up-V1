@@ -96,8 +96,13 @@ export const AuthProvider = ({ children }) => {
       
       if (response.success) {
         // Registration successful but email not verified yet
-        // Return success so user can be redirected to OTP page
-        return { success: true, message: response.message };
+        // Return success with normalized email from backend
+        return { 
+          success: true, 
+          message: response.message,
+          email: response.data?.email || collegeData.email,
+          userType: response.data?.userType || 'college'
+        };
       } else {
         return { success: false, message: response.message };
       }
@@ -132,8 +137,13 @@ export const AuthProvider = ({ children }) => {
       
       if (response.success) {
         // Registration successful but email not verified yet
-        // Return success so user can be redirected to OTP page
-        return { success: true, message: response.message };
+        // Return success with normalized email from backend
+        return { 
+          success: true, 
+          message: response.message,
+          email: response.data?.email || companyData.email,
+          userType: response.data?.userType || 'company'
+        };
       } else {
         return { success: false, message: response.message };
       }
