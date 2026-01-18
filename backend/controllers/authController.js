@@ -16,6 +16,15 @@ exports.registerCollege = async (req, res) => {
   try {
     const { password, collegeName, email, contactNo } = req.body;
     
+    // Ensure database is connected before proceeding
+    const isConnected = await ensureConnected();
+    if (!isConnected) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection unavailable. Please try again in a moment.'
+      });
+    }
+    
     // Normalize email (lowercase and trim) for consistency
     const normalizedEmail = email ? email.toLowerCase().trim() : '';
     
@@ -27,7 +36,17 @@ exports.registerCollege = async (req, res) => {
     }
     
     // Check if user already exists
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    let existingUser;
+    try {
+      existingUser = await User.findOne({ email: normalizedEmail });
+    } catch (dbError) {
+      console.error('Database query error in registerCollege:', dbError);
+      return res.status(500).json({
+        success: false,
+        message: 'Database error. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+      });
+    }
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
@@ -54,13 +73,22 @@ exports.registerCollege = async (req, res) => {
       otpExpiry
     });
     
-    await user.save();
-    await new College({
-      user: user._id,
-      collegeName,
-      email: normalizedEmail,
-      contactNo
-    }).save();
+    try {
+      await user.save();
+      await new College({
+        user: user._id,
+        collegeName,
+        email: normalizedEmail,
+        contactNo
+      }).save();
+    } catch (saveError) {
+      console.error('Error saving user or college:', saveError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create account. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? saveError.message : undefined
+      });
+    }
 
     // Send OTP email
     const emailSent = await emailService.sendOTPEmail(normalizedEmail, otp, collegeName, 'college');
@@ -154,6 +182,15 @@ exports.registerCompany = async (req, res) => {
   try {
     const { companyName, password, email, contactNo, industry, companySize, location } = req.body;
     
+    // Ensure database is connected before proceeding
+    const isConnected = await ensureConnected();
+    if (!isConnected) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database connection unavailable. Please try again in a moment.'
+      });
+    }
+    
     // Normalize email (lowercase and trim) for consistency
     const normalizedEmail = email ? email.toLowerCase().trim() : '';
     
@@ -165,7 +202,17 @@ exports.registerCompany = async (req, res) => {
     }
     
     // Check if user already exists
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    let existingUser;
+    try {
+      existingUser = await User.findOne({ email: normalizedEmail });
+    } catch (dbError) {
+      console.error('Database query error in registerCompany:', dbError);
+      return res.status(500).json({
+        success: false,
+        message: 'Database error. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+      });
+    }
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
@@ -195,16 +242,25 @@ exports.registerCompany = async (req, res) => {
       otpExpiry
     });
     
-    await user.save();
-    await new Company({
-      user: user._id,
-      companyName,
-      email: normalizedEmail,
-      contactNo,
-      industry,
-      companySize,
-      location
-    }).save();
+    try {
+      await user.save();
+      await new Company({
+        user: user._id,
+        companyName,
+        email: normalizedEmail,
+        contactNo,
+        industry,
+        companySize,
+        location
+      }).save();
+    } catch (saveError) {
+      console.error('Error saving user or company:', saveError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create account. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? saveError.message : undefined
+      });
+    }
 
     // Send OTP email
     const emailSent = await emailService.sendOTPEmail(normalizedEmail, otp, companyName, 'company');
