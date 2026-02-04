@@ -65,6 +65,12 @@ const validateCompanyRegister = [
   body('companySize')
     .isIn(['1-50', '51-200', '201-500', '501-1000', '1000+'])
     .withMessage('Invalid company size'),
+  body('location')
+    .trim()
+    .notEmpty()
+    .withMessage('Location is required')
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Location must be between 2 and 200 characters'),
   handleValidationErrors
 ];
 

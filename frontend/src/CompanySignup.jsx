@@ -72,10 +72,73 @@ const CompanySignup = () => {
           }
         });
       } else {
-        setMessage(result.message);
+        let errorMessage = result.message || 'Registration failed. Please try again.';
+        // In development, if OTP is included in response, redirect to OTP page with it
+        if (result.otp && import.meta.env.MODE === 'development') {
+          console.log('⚠️ DEVELOPMENT MODE: OTP received in response:', result.otp);
+          // Still redirect to OTP page even if email failed, but pass the OTP
+          navigate('/verify-otp', {
+            state: {
+              email: result.email || formData.email,
+              userType: result.userType || 'company',
+              devOTP: result.otp
+            }
+          });
+          return;
+        }
+        setMessage(errorMessage);
       }
     } catch (error) {
-      setMessage('An unexpected error occurred. Please try again.');
+      const errorData = error.response?.data || {};
+      let errorMessage = errorData.message || error.message || 'An unexpected error occurred. Please try again.';
+      
+      // Handle validation errors (from express-validator)
+      if (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+        const validationMessages = errorData.errors.map(err => err.message || `${err.field}: ${err.message}`).join(', ');
+        errorMessage = `Validation failed: ${validationMessages}`;
+        // Also set field-specific errors
+        const fieldErrors = {};
+        errorData.errors.forEach(err => {
+          if (err.field) {
+            fieldErrors[err.field] = err.message;
+          }
+        });
+        if (Object.keys(fieldErrors).length > 0) {
+          setErrors(fieldErrors);
+        }
+      }
+      
+      // Handle network errors
+      if (!error.response) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      }
+      
+      // Handle timeout errors
+      if (error.code === 'ECONNABORTED' || error.message.includes('timeout') || error.message.includes('exceeded')) {
+        errorMessage = 'Request timed out. The server is taking too long to respond. Please try again.';
+      }
+      
+      // Handle timeout status codes
+      if (error.response?.status === 504) {
+        errorMessage = errorData.message || 'Server timeout. Please try again.';
+      }
+      
+      // In development, if OTP is included in response, redirect to OTP page with it
+      if (errorData.data?.otp && import.meta.env.MODE === 'development') {
+        console.log('⚠️ DEVELOPMENT MODE: OTP received in response:', errorData.data.otp);
+        // Still redirect to OTP page even if email failed, but pass the OTP
+        navigate('/verify-otp', {
+          state: {
+            email: errorData.data?.email || formData.email,
+            userType: errorData.data?.userType || 'company',
+            devOTP: errorData.data.otp
+          }
+        });
+        return;
+      }
+      
+      // Always display error message on screen
+      setMessage(errorMessage);
     } finally {
       setIsLoading(false);
     }
